@@ -1,0 +1,362 @@
+---
+title: "R0 | Wprowadzenie do przetwarzania danych w R"
+author: "Szymon Talaga, ISS UW"
+date: '`r Sys.Date()`'
+output:
+  html_notebook:
+    toc: true
+  html_document:
+    toc: true
+---
+
+<hr>
+
+## Podstawowe typy i struktury danych w języku **R**
+
+Język **R** wykorzystuje bardzo wiele różnych typów i struktur danych. Szczęśliwie jednak tylko niektóre z nich spotyka się i wykorzystuje na codzień przy typowej analizie danych.
+
+Wszystkie typy danych w R można przyporządkować do dwóch podstawowych rodzin (i jest to niezwykle ważne rozróżnienie):
+
+ * typów prostych (tzw. atomowych), np. liczby czy napisy: `1`, `napis`.
+    * _są to wartości niepodzielne, których nie można rozmontować na elementy składowe._
+ * typów złożonych, np. listy `list(a = 1, b = list(c = 2, d = 3))`.
+    * _obiekty składające się z innych obiektów (w tym zarówno wartości atomowych jak i innych obiektów złożonych)._
+    
+### Najważniejsze typy atomowe
+
+#### Liczby
+
+```{r AtomoweLiczby, echo = FALSE}
+c(1, 1.5, 0, -2, 30)
+c(1L, 10L, 11L)
+c(2+3i, 101+17i)
+```
+
+#### Wartości logiczne
+
+```{r AtomoweLogiczne, echo = FALSE}
+c(TRUE, FALSE)
+```
+
+#### Napisy
+
+```{r AtomoweNapisy, echo = FALSE}
+c("jeden napis", "drugi napis")
+```
+
+#### Czynniki (_factors_)
+
+```{r AtomoweCzynniki, echo = FALSE}
+factor(c("czynnik I", "czynnik II"))
+```
+
+#### Braki danych
+
+```{r AtomoweBrakiDanych, echo = FALSE}
+c(NA, NULL)
+```
+
+### Operacje na wartościach atomowych
+
+**R** jest w pewnym sensie bardzo rozbudowanym kalkulatorem. W związku z tym można na nim bez przeszkód dokonywać wszystkich standardowych operacji matematycznych. Więcej informacji na ten temat można znaleźć wpisując w konsoli m.in.: `?Arithmetic`, `?Trig`, `?log`.
+
+```{r AtomoweArytmetyka, eval = FALSE}
+1 + 2       # dodawanie
+100 - 50    # odejmowanie
+17 * 12     # mnożenie
+100 / 10    # dzielenie
+2^8         # potęgowanie
+16^(1/4)    # pierwiastkowanie
+```
+
+Oczywiście dokonywane operacje muszą mieć sens. W innym przypadku interpreter **R** zgłosi błąd i zatrzyma wykonywanie kodu. Jednym z najczęściej spotykanych w praktyce błędów są błędy związane z niekompatybilnością typów (dlatego świadomość wykorzystywanych w obliczeniach typów i struktur danych jest taka ważna!).
+
+```{r AtomoweBłądPrzykład, eval = FALSE}
+### Przykład: operacja arytmetyczna na liczbie i tekście
+10 * "10"
+Error in 10 * "10" : non-numeric argument to binary operator
+```
+
+### Operacje logiczne
+
+Jedną ze wspaniałych cech języka **R**, która wyróżnia go na tle innych środowisk obliczeniowych, i która sprawia, że jest on niezastąpiony jako narzędzie interaktywnej analizy danych rzeczywistych, jest jego podejście do operacji logicznych. W języku **R** nie posługujemy się tak naprawdę znaną ze szkoły i studiów logiką arystotelesowską (2-wartościową) lecz tzw. 3-wartościową logiką Łukasiewicza.
+
+W tej logice mamy trzy wartości: prawdę (`TRUE`), fałsz (`FALSE`) oraz brak danych (`NA`). Poniżej podane są tablice prawdy dla trzech podstawowych operatorów logicznych: negacji ($\neg$), koniunkcji ($\wedge$) i dysjunkcji ($\vee$).
+
+#### Negacja
+
+```{r AtomoweLogikaNegacja, echo = FALSE}
+x <- c(FALSE, TRUE, NA)
+names(x) <- !x
+```
+
+#### Koniunkcja
+
+```{r AtomoweLogikaKoniunkcja, echo = FALSE}
+x <- c(TRUE, FALSE, NA)
+m <- outer(x, x, FUN = "&")
+colnames(m) <- x
+rownames(m) <- x
+m
+```
+
+#### Dysjunkja
+
+```{r AtomoweLogikaDysjunkcja}
+x <- c(TRUE, FALSE, NA)
+m <- outer(x, x, FUN = "|")
+colnames(m) <- x
+rownames(m) <- x
+m
+```
+
+#### Składania operacji logicznych
+
+```{r AtomoweLogikaSkładnia}
+!FALSE          # Negacja
+TRUE & FALSE    # Koniunkcja
+TRUE | FALSE    # Dysjunkcja
+
+# Porównania logiczne
+1 == 1      # test równości
+1 != 1      # test nierówności
+1 > 1       # test 'większe od'
+1 < 1       # test 'mniejsze od'
+1 >= 1      # test 'większe od lub równe'
+1 <= 1      # test 'mniejsze od lub równe'
+```
+
+### Wektoryzacja operacji na wartościach atomowych
+
+Kolejna bardzo wygodną cechą języka **R** jest to, że traktuje on wszystkie wartościa atomowe (i nie tylko) jak wektory. Innymi słowy w pewnym sensie zbiór 10 liczb nie różni się w żaden jakościowy sposób od pojedynczej liczby (która w istocie jest traktowana w **R** jako wektor o długości 1). Dzięki temu, gdy **R** potrafi zinterpretować operacje arytemtyczne pomiędzy pojedynczymi liczba i wektorami oraz samymi wektorami.
+
+```{r AtomoweWektoryzacjaPrzykłady}
+# Tworzenie wektora, `c` to tzw. funkcja łącząca elementy
+x <- c(1, 15, 100, 120, 7)
+# Przykład zwektoryzowanej operacji.
+x * 2
+length(x)   # Długość wektora
+```
+
+W większości jezyków programowania taka operacja musiałaby być wyrażona w znacznie bardziej skomplikowany sposób. Przy czym oczywiście w **R** również można zastosować takie podejście, ale sęk w tym, że nie trzeba tego robić (bo jest to niewygodne i zazwyczaj mniej wydajne z punktu widzenia czasu trwania obliczeń).
+
+```{r AtomowePętla}
+x <- c(1, 15, 100, 120, 7)
+for (i in 1:length(x)) {
+    x[i] <- x[i] * 2
+}
+x
+```
+
+Jak widać otrzymane wyniki są dokładnie takie same, ale drugi sposób dokonania obliczeń jest o wiele bardziej skomplikowany. Powyższe wyrażenie to przykład tzw. _pętli_ czyli rodzaju mechanizmu kontroli przepływu danych w programie (te zagadnienia zostawimy sobie jednak na inną okazję).
+
+#### Indeksowanie wektorów
+
+Wektory jako obiekty złożone z wielu elementów pozwalają na tzw. indeksowanie, czyli ekstrakcje określonych elementów poprzez wskazanie ich pozycji w ciągu elementów wektora. Jak pokaże poniższy przykład, bardzo przydatna w tym kontekście okazuje się możliwość łatwego generowania ciągów kolejnych liczb (`x:y`, np. `1:10`).
+
+```{r AtomoweWektorIndeksowanie}
+letters[5:10]       # Ciąg od 5 do 10 litery alfabetu łacińskiego
+# Przekazując ujemne indeksy można wykluczać poszczególne elementy
+letters[-(5:10)]    # Alfabet bez ciągu liter od 5 do 10
+# Indeksy dodatnie i ujemne nie mogą być jednak mieszane w jednej operacji indeksowania
+# Można jednak obejść ten problem dzięki "składaniu" kolejnych indeksowań, 
+# wymaga to jednak odpowiedniego przeliczania indeksów np.
+letters[5:10][-3]   # Ciąg od 5 do 10 litery alfabetu bez 7
+```
+
+Dodatkowo wektory elementy wektorów mogą być związane z nazwami. W takim przypadku możliwe jest również dostęp do elementów przez nazwę zamiast pozycji. Przydatność tego mechanizmu zaprezentujemy na trochę bardziej złożonym (choć wciąż prostym) przykładzie. Pokażemy jak przy użyciu wektora z nazwami wykorzystać tzw. tablicowanie (`lookup table`) w celu szybkiego rekodowania czynnika o wielu poziomach.
+
+```{r AtomoweWektorIndeksowanieNazwy}
+# Najpierw stwórzmy czynnik
+set.seed(303)
+poziomy <- c("A", "B", "C", "D", "E", "F", "G", "H", "I", "J")
+czynnik <- factor(sample(poziomy, size = 10000, replace = TRUE), levels = poziomy)
+head(czynnik, n = 6)   # wyświetla pierwsze 6 elementów
+
+# Zdefiniujmy naszą 'lookup table'
+lookup_table <- c(
+    A = "nowe A",
+    B = "nowe B",
+    C = "nowe C",
+    D = "nowe D",
+    E = "nowe E",
+    F = "nowe F",
+    G = "nowe G",
+    H = "nowe H",
+    I = "nowe I",
+    J = "nowe J"
+)
+# Teraz wykorzystamy indeksowanie po nazwach do stworzenia nowego zrekodowanego czynnika
+nowy_czynnik <- unname(factor(lookup_table[czynnik], levels = lookup_table))
+head(nowy_czynnik)  # wyświetla pierwsze 6 elementów
+
+# Co więcej, w przypadku tak regularnej zmiany nazewnictwa jak powyższa
+# całą operację można przeprowadzić jeszcze prościej, 
+# wykorzystując proste metody przetwarzania napisów.
+#
+# Zamiast definiować obiekt `lookup_table` ręcznie, możemy stworzyć go
+# doklejając napis "nowe" do wyjściowych nazw czynników.
+# Wykorzystamy do tego funkcję `paste` (dokumentacja: ?paste).
+lookup_table2 <- paste("nowe", poziomy)
+names(lookup_table2)     
+# Tablica nie ma jednak jeszcze nazw ...
+lookup_table
+# Dlatego trzeba je dodać określając dodatkowo atrybut `names`
+names(lookup_table2) <- poziomy
+lookup_table2
+# Zauważmy, że obie tabele są teraz równoważne
+identical(lookup_table, lookup_table2)
+
+# Teraz można dokonać podstawienia tak, jak poprzednio
+nowy_czynnik2 <- unname(factor(lookup_table2[czynnik], levels = lookup_table2))
+# I tu też wynik jest równoważny do poprzedniego
+identical(nowy_czynnik, nowy_czynnik2)
+
+# Ten sam efekt można również osiągnąć stosując podejście oparte na ręcznym indeksowaniu
+# i nadpisywaniu wartości. Jest ono jednak o wiele mniej wygodne. Zobaczmy, więc jak by to wyglądąło.
+czynnik <- as.character(czynnik)
+czynnik[czynnik == "A"] <- "nowe A"
+czynnik[czynnik == "B"] <- "nowe B"
+czynnik[czynnik == "C"] <- "nowe C"
+czynnik[czynnik == "D"] <- "nowe D"
+czynnik[czynnik == "E"] <- "nowe E"
+czynnik[czynnik == "F"] <- "nowe F"
+czynnik[czynnik == "G"] <- "nowe G"
+czynnik[czynnik == "H"] <- "nowe H"
+czynnik[czynnik == "I"] <- "nowe I"
+czynnik[czynnik == "J"] <- "nowe J"
+czynnik <- factor(czynnik, levels = lookup_table)
+identical(czynnik, nowy_czynnik)
+```
+
+## Typy złożone
+
+Typów złożonych jest w **R** bardzo wiele (a w pewnym sensie nawet nieskończenie wiele, bo można bez przeszkód definiować własne typy złożone samemu). My skupimy się jednak jedynie na 3 najważniejszych: macierzach (`matrix`), listach (`list`) i ramkach danych (`data.frame`).
+
+### Macierze
+
+Macierz w **R** to po prostu wektor wartości atomowych z dodaną do niego informacją (tzw. _atrybutem_) na temat jego wymiarów. Fakt, że macierz specyficzny rodzaj wektora oznacza, że macierz może zawierać w sobie jedynie wartości **jednego typu**. Możemy mówić zatem o macierzach liczb, napisów, wartości logicznych, czynników itp. Nie istnieją jednak macierze, które np. w jednej kolumnie miały by liczby a w drugiej napisy (odpowiednią do tego strukturą danych są ramki danych).
+
+```{r ZłożoneMacierze}
+M <- matrix(1:9, ncol = 3, nrow = 3)    # tworzymy macierz
+M
+dim(M)  # wymiary macierzy
+M*3     # operacje na macierzy również są zwektoryzowane
+M %*% c(1, 0, 1)    # R wspiera również algebrę liniową (tu iloczyn macierzy i wektora)
+```
+
+### Listy
+
+Prawdopodobnie listy są najważniejszym rodzajem struktury danych w **R**, jako że są one podstawą, na której budowana jest większość innych, bardziej wyspecjalizowanych struktur danych (jak zobaczymy za chwilę, ramki danych są tak naprawdę po prostu szczególnym przypadkiem listy).
+
+Lista to po prostu uporządkowany (zatem indeksowalny w podobny sposób jak wektor) zbiór elementów. Od wektora atomowego różni się tym, że jej elementy mogą być dowolnego typu (a więc może przechowywać w sobie nie tylko obiekty typu atomowego ale również obiekty złożone). Listy mają również to do siebie, że są tzw. typem rekursywnym, co oznacza, że listy mogą zawierać w sobie inne listy i tak potencjalnie w nieskończoność.
+
+Listy są niezwykle przydatne, ponieważ pozwalają w zorganizowany sposób przechowywać wiele potencjalnie zupełnie różnych obiektów. Dodatkowo tak, jak w przypadku wektorów, obiekty w listach mogą być powiązane z nazwami, dzięki czemu można je łatwo odnajdować po nazwach zamiast po indeksach liczbowych.
+
+```{r ZłożoneListy}
+# Przykładowa lista.
+# Zauważny, że elementami list mogą być inne listy, a nawet ramka danych.
+# Ponadto jednocześnie mogą występować obok siebie elementy z nazwami i bez nazw
+# (choć zasadniczo dobrą praktyką jest albo nie korzystać z nazwa albo nazywać wszystkie elementy).
+Lista <- list(1, a = 2, list(a = 2, b = 4), b = list(a = NULL, b = head(iris, n = 5)))
+print(Lista)
+
+# Listy są uporządkowane mogą być indeksowane liczbowo (niezależnie od występowania nazw)
+Lista[2]
+# Zauważmy, że poprzednia komenda nie zwróciła samej liczby,
+# ale 1-elementową listę zawierającą w sobie liczbę.
+#
+# Jest to pokłosie rekursywności list. Każdy element list jest domyślnie traktowany
+# jako osobna mini-lista.
+# Do "wyłuskiwania" konkretnych wartości służy dodatkowy operator ekstrakcji "[["
+Lista[[2]]      # Jak widać, tym razem wynikiem jest rzeczywiście sama liczba
+```
+
+Świadomość opisanych wyżej niuansów związanych z wyłuskiwaniem elementów list jest bardzo przydatna, gdyż pozwala ustrzec się wielu prostych błędówch przy przetwarzaniu danych przetrzymywanych w listach.
+
+### Ramki danych (`data.frame`s)
+
+Z punktu widzenia typowych analiz statystycznych zdecydowanie najważnieszą dla praktyka klasą obiektów są tzw. ramki danych (`data.frame`). Obiekty te służą do reprezentacji typowego dla badań statystycznych prostokątnego zbioru danych, których zawiera w sobie informacje na temat pomiarów $m$ zmiennych na $n$ jednostkach obserwacji.
+
+Największymi zaletami ramek danych jest to, że pozwalają one na zorganizowane przechowywanie wielu zmiennych równocześnie w taki sposób, że moża uzyskiwać dostęp do ich wartości indeksując równocześnie po wierszach (jednostki obserwacji) i kolumnach (zmienne). Dodatkowo ramki danych --- w przeciwieństwie do macierzy --- mogą zawierać w sobie zmienne różnych typów. Dzięki temu mogą one służyć do reprezentacji spotykanych w praktyce zbiorów danych, w których normą jest jednoczesne występowanie danych liczbowych, tekstowych i innych.
+
+Podstawowe operacje na ramkacj danych zaprezentujemy na słynnym zbiorze danych `iri` związanym z osobą Ronalda Fishera.
+
+```{r ZłożoneRamkiDanych}
+# Ramki danych zawsze mają nazwane kolumnny
+names(iris)
+# oraz określoną liczbę wierszy
+nrow(iris)
+# Łatwo można podejrzeć n pierwszych wierszy
+# (funkcja ta działa również na listach i wektorach)
+head(iris, n = 10)
+# oraz n ostatnich wierszy
+tail(iris, n = 3)
+
+# Zauważmy, że poza zmiennymi ilościowymi (4 pierwsze kolumny)
+# jest tu również zmienna jakościowa ("Species")
+
+# Łatwo można z ramki danych "wydobyć" konretną zmienną
+head(iris$Species)
+# Można to również zrobić używając indeksu liczbowego
+head(iris[[5]])
+
+# Jednak jedną z najważniejszych zalet ramek danych jest możliwość
+# jednoczesnego indeksowania po wierszach i kolumnach
+#
+# Poniżej wydobywamy wszystkie pomiary "Sepal.Length" i "Sepal.Width" 
+# rekordów gatunku "versicolor".
+iris[iris$Species == "versicolor", c("Sepal.Length", "Sepal.Width")]
+
+# Jeżeli wskażemy pojedynczą zmienną zamiast dwóch, to zamiast ramki danych,
+# rezultatem operacji będzie wektor.
+iris[iris$Species == "virginica", "Petal.Length"]
+
+# Jeśli chcemy wziąc wszystkie wiersza albo kolumny,
+# to należy w odpowiednim miejscu zostawić przy indeksowaniu puste miejsce
+#
+# Wszystkie wiersza ale wybrane kolumny
+iris[ , c("Sepal.Length", "Species")]
+# Wszystkie kolumny ale wybrane wiersze
+iris[1:4, ]
+
+# Łatwo również "na szybko" podsumować ramkę danych
+# (funkcja ta działa również na wektorach i innych typach obiektów, por. ?summary)
+summary(iris)
+```
+
+<!-- CSS styling -->
+<style>
+    html {
+        height: 100%;
+        font-size: 62.5%;
+    }
+    body {
+        height: 100%;
+        font-size: 1.6em;
+        font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", sans-serif;
+    }
+    h1, h2, h3 {
+        text-align: center;
+    }
+    h4.author, h4.date {
+        margin: 0.75em 0 0 0;
+        text-align: center;
+    }
+    h2, h3, h4, h5, h6 {
+        margin: 2em 0 1em 0;
+    }
+    div#header {
+        margin: 1em 0 1em 0;
+    }
+    hr {
+        margin: 2em 0 2em 0;
+    }
+    pre {
+        margin-bottom: 2em;
+    }
+</style>
+
+<hr>
+
+<!-- End of styling -->
