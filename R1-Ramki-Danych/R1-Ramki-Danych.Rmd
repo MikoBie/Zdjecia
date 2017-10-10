@@ -1,0 +1,306 @@
+---
+title: "R1 | Ramki danych"
+author: "Szymon Talaga, ISS UW"
+date: '`r Sys.Date()`'
+output:
+  html_notebook:
+    toc: true
+  html_document:
+    toc: true
+---
+
+<hr>
+
+## Wprowadzenie
+
+Ramki danych (`data.frame`s) to najważniejsza z punktu widzenia tradycyjnych obliczeń statystycznych struktura danych, z jaką pracuję się na codzień w **R**. Reprezentują one typowy zbiór danych statystycznych w postaci prostokątnej tabeli (taki w którym mamy $k$ zmiennych i $n$ pomiarów dla każdej z nich).
+
+Wewnętrznie ramki są reprezentowane w **R** jako listy, w których każdy element jest wektorem o takiej samej długości. Jest to o tyle istotna informacja, że oznacza to, że większość operacji, która może być wykonana na listach, może być również dokonana na ramce danych.
+
+W dalszej części zaprezentujemy szereg najważniejszych operacji, które można wykonywać na ramkach danych. Za przykład posłuży słynny zbiór danych `iris`.
+
+```{r irisHead}
+head(iris)
+```
+
+## Operacje listowe
+
+```{r operacjeListowe}
+### Ramki danych wspierają wyłuskiwanie zmiennych za pomocą operatora '$'
+### zwracany w takim przypadku jest wektor odpowiadający danej zmiennej.
+head(iris$Sepal.Length)
+
+### Kolumny (zmienne) mogą być również wybierane przy pomocy operatora
+### dostępu do elementu listy '[['
+head(iris[["Species"]])
+
+### Warto zauważyć, że w tym przypadku można przekazywać nazwę zmiennej również
+### jako zmienną
+varname <- "Species"
+head(iris[[varname]])
+
+### Ramki danych, jako że są listami, są iterowalne,
+### tj. można po nich przebiec np. pętlą `for`.
+### W takim przypadku elementami iteracji są właśnie kolumny
+for (i in iris) {
+    print(head(i))
+}
+
+### Można również łatwo samemu się przekonać, że ramki danych są listami.
+### W tym celu można wykorzystać funkcję 'unclass'.
+L <- unclass(iris)
+L
+### Jak widać, jest to rzeczywiście prosta lista wektorów z dodanym atrybutem ('row.names').
+### Szczegółowe omówienie funkcji atrybutów zostawimy na kiedy indziej,
+### ale w tym momencie wystarczy powiedzieć, że R przewidują możliwość,
+### 'dodawania' arbitralnych metadanych do dowolnych obiektów,
+### i do tego służą właśnie m.in. atrybuty.
+
+### Dodatkowo instruujące może być pokazanie, jak łatwo można przekształcić otrzymaną listę
+### z powrotem w ramkę danych. Wystarczy z przypisać jej odpowiednią klasę.
+class(L) <- "data.frame"
+head(L)
+```
+
+## Indeksowanie
+
+Ramki danych różnią się od list pod przynajmniej jednym bardzo ważnym względem, który sprawia, że są one najważniejszą z punktu widzenia klasycznej statystyki strukturą danych w **R**. Są one wyposażone w możliwość jednoczesnego indeksowania w dwóch wymiarach --- po wierszach (kolejnych elementach wektorów) i zmiennych (kolumnach). Jest to możliwe, ponieważ ramki danych są listami wektorów **o tej samej długości**.
+
+```{r Indeksowanie1}
+### Elementy można wybierać podając indeksy liczbowe
+iris[5, 5]
+
+### Jednocześnie zmienne można wybierać po nazwach (przekazując odpowiednie napisy)
+iris[5, "Species"]
+
+### Wiersze rówież mogą być indeksowane po nazwach
+iris["5", "Species"]
+```
+
+Indeksowanie przez podawanie konkretnych wartości ma jednak bardzo ograniczoną użyteczność.
+Możliwe jest jednak indeksowanie wykorzystujące zmienne (oraz wiele wartości równocześnie).
+
+```{r Indeksowanie2}
+x  <- c(1, 5, 6)     # indeksy wierszy
+y1 <- c(1, 2)        # indeksy kolumn
+y2 <- c("Sepal.Length", "Sepal.Width")
+iris[x, y1]
+iris[x, y2]
+
+# Jeśli chcemy wybrać wszystkie elementy w jedny z wymiarów (wiersz lub kolumny)
+# to możemy zostawić dane pole indeksowanie puste.
+head(iris[ , "Species"])    # wszystkie rekordy dla zmiennej 'Species'
+iris[1:5, ]                 # 5 pierwszych rekordów dla wszystkich zmiennych
+```
+
+Wybieranie elementów przez określanie wielu wartości (nawet wielokrotnych i definiowanych dynamicznie poprzez zmienne) wciąż nie pozwala w wielu przypadkach na wygodne wyłuskiwania interesujących elementów. Dlatego ramki danych (a co za tym idzie również wszystkie wektory w **R**) mogą być indeksowane za pomocą wartości logicznych czyli `TRUE` i `FALSE`.
+Ten rodzaj indeksowania działa jednak w trochę inny sposób.
+
+Gdy chcemy wybrać $k$ elementów po indeksach liczbowych bądź nazwach, musimy podać $k$ indeksów liczbowych (lub nazw) wskazujących ich pozycje. Jednak gdy używamy indeksów logicznych, to zawsze musimy podać wektor wartości logicznych o długości równej długości obiektu, który indeksujemy, zaś wartości logiczne muszą być dobrane w taki sposób, aby wszystkie wartości `TRUE` przypadały w miejscach elementów, które chcemy wyłuskać i wszystkie wartości elementów `FALSE` w miejscach elementów, które chcemy pominąć. Zasada ta w praktyce jest bardzo prosta.
+
+```{r Indeksowanie3}
+### Wybór wszystkich elementów gatunku setosa oraz zmiennych 'Sepal.Legnth' i 'Sepal.Width'
+iris[iris$Species == "setosa", c("Sepal.Length", "Sepal.Width")]
+
+### Wybór wszystkich zmiennych, zaczynających się od 'Sepal'
+iris[, grepl("^Sepal\\.", names(iris), perl = TRUE)]
+```
+
+Powyższe przykłady mogą pozostawiać jednak pewien niedosyt, gdyż składnia odpowiednich poleceń jest dość skomplikowana, a jednocześnie przedstawione operacje to absoluten podstawy analizy danych. Chciałoby się więc, żeby mogły być one prostsze.
+
+## Pakiet _dplyr_
+
+Szczęśliwie społeczność analityków i programistów używających **R** stworzyła już tysiące dodatkowych pakietów, które znacznie ułatwiają większość najważniejszych operacji obliczeniowych i statystycznych (i nie tylko). Jednym z najbardziej godnych polecenie uwagi pakietów w tym gronie jest pakiet `dplyr`. Pozwala on w sposób niezwykle wygodny (pod względem składni poleceń) oraz bardzo wydajny (pod względem czasu obliczeń) dokonywać praktyczne dowolnie skomplikowanych przekształceń danych. Ze względu na swoją wydajność jest również świetnym narzędziem do analizy dużych zbiorów danych (choć do analizy naprawdę dużych zbiorów danych jest kilka jeszcze lepszych narzędzi).
+
+```{r dplyr1}
+library(dplyr)  # wczytanie pakietu
+
+### Indeksowanie po numerach wierszy
+slice(iris, 1:5)
+### Indeksowanie po numerach kolumn
+select(iris, 1:2)
+### Indeskowanie kolumn po nazwach
+select(iris, Sepal.Length, Species)
+### Indeksowanie po zakresach nazw
+select(iris, Sepal.Length:Petal.Length)
+### Wykluczanie kolumn (indeksowanie negatywne)
+select(iris, -Species)
+```
+
+Możliwości pakietu `dplyr` sięgają jednak o wiele dalej niż proste wybór kolumn i wierszy. Nim jednak przejdziemy do bardziej zaawansowanych zastosowań, to przedstawimy jeszcze jeden istotny dla wydajnej analizy koncept, który pełni też centralną rolę w filozofii pakietu `dplyr`. Koncept ten to tzw. przetwarzanie potokowe (*pipeline computing* / *sequential processing*).
+
+Przetwarzanie potokowe (być może znane tym, którzy mieli styczność z systemami operacyjnymi z rodziny UNIX) jest sposobem na bardzo wygodne definiowanie skomplikowanych operacji poprzez wiązanie ze sobą (w analogiczny do składania funckji w matematyce) szeregu następujących operacji.
+
+```{r dplyr pipeline1}
+### Wybór kolumn i wierszy
+
+### Podejście niepotokowe
+slice(select(iris, Sepal.Length:Sepal.Width), 1:10)
+
+### Podejście potokowe
+iris %>% 
+    select(Sepal.Length:Sepal.Width) %>%
+    slice(1:10)
+```
+
+Użyteczność przetwarzania potokowego staje się o wiele lepiej widoczna przy bardziej skomplikowanych operacjach. Potęgę pakietu `dplyr` w połączeniu z przetwarzaniem potokowym bardzo dobrze widać na przykładzie jednej z najważniejszych operacji w całej statystyce czyli agregacji danych.
+
+```{r dplyr_agregacja}
+### Agregacja: obliczenie średnich i wariancji zmiennej 'Sepal.Legnth' w podziale na gatunki ('Species')
+
+### Podejście naiwne, wykorzystujące tylko najbardziej podstawowe polecenie bazowego R
+c(mean(iris[iris$Species == "setosa", "Sepal.Length"]), var(iris[iris$Species == "setosa", "Sepal.Length"]))
+c(mean(iris[iris$Species == "virginica", "Sepal.Length"]), var(iris[iris$Species == "virginica", "Sepal.Length"]))
+c(mean(iris[iris$Species == "versicolor", "Sepal.Length"]), var(iris[iris$Species == "versicolor", "Sepal.Length"]))
+
+### Podejście wydajniejsze wykorzystujące funkcję 'tapply'
+tapply(iris$Sepal.Length, iris$Species, mean)
+tapply(iris$Sepal.Length, iris$Species, var)
+
+### Podejeście jeszcze wydajniejsze wykorzystujące 'tapply' z tzw. funckją anonimową
+tapply(iris$Sepal.Length, iris$Species, function(x) c(M = mean(x), VAR = var(x)))
+
+### Podejście wykorzystujące wbudowaną funkcję aggregate
+aggregate(iris$Sepal.Length, by = list(iris$Species), mean)
+
+### Podejście pakietu dplyr bez przetwarzania potokowego
+summarize(group_by(iris, Species), M = mean(Sepal.Length), VAR = var(Sepal.Length))
+
+### Podejście pakietu dplyr z przetwarzaniem potokowym
+iris %>%
+    group_by(Species) %>%
+    summarize(
+        M = mean(Sepal.Length),
+        VAR = var(Sepal.Length)
+    )
+```
+
+Poniżej przedstawiamy kilka bardziej zaawansowanych przykładów zastosowań `dplyr` i przetwarzania potokowego.
+
+```{r dplyr_agregacja2}
+### Pakiet rozszerzonego wsparcia przetwarzani potokowego
+library(magrittr)
+
+### Agregacja wszystkich pozostałych zmiennych ilościowych 
+### w zakresach jednej zdyskretyzowanej zmiennej ilościowej
+iris %>%
+    mutate(
+        Dyskretna = case_when(
+            Sepal.Length <= quantile(Sepal.Length, .25) ~ "Low",
+            Sepal.Length >= quantile(Sepal.Length, .75) ~ "High",
+            TRUE ~ "Mid"
+        )
+    ) %>%
+    select(-Sepal.Length) %>%
+    group_by(Dyskretna) %>%
+    summarize_if(is.numeric, mean)
+
+### Estymacja średniej populacyjnej z uwzględnieniem struktury grupowej
+### (inverse variance weighting)
+iris %>%
+    group_by(Species) %>%
+    summarize(
+        M = mean(Sepal.Length),
+        w = 1 / (var(Sepal.Length) / n())
+    ) %$%
+    {
+        sum(M * w) / sum(w)
+    }
+```
+
+Bardzo przydatną w wielu przypadkach techniką są tzw. "złączenia" (*joins*). Cała rodzina tych metod jest bardzo bogata i pokrywa bardzo wiele operacji częściej bądź rzadziej przydatnych przy analizie danych. Tu omówimy jedynie trywialny (i trochę sztuczny) przypadek tzw. lewego złączenia (*left join*). Pozwala ono połączyć dwa zbior danych na podstawie jednej (bądź kilku) współdzielonych przez nie kolumn (tzw. kluczy).
+
+```{r dplyr left_join}
+### Załóżmy, że dysponujemy dodatkowym zbiorem danych określającym (jakościowo)
+### w jakiej temperaturze dokonywano pomiarów dla poszczególnych gatunków kwiatów
+### w zbiorze iris.
+iris_temp <- data.frame(
+    Species = c("setosa", "versicolor", "virginica"),
+    Temp = c("warm", "medium", "cold")
+)
+iris_temp
+
+### Left join
+left_join(iris, iris_temp, by = "Species") %>%
+    slice(c(1:2, 51:52, 101:102))
+```
+
+## Oglądanie zbioru danych
+
+Domyślnie ramki danych nie wyświetlają się w szczególnie wygodny sposób, zwłaszcza gdy mają wiele wierszy i/lub kolumn. Szczęśliwie pakiet `dplyr` implementuje również ulepszoną wersję ramki danych, która zachowuje się pod prawie każdym względem tak samo, ale ma o wiele przyjaźniejszy domyślny tryb wyświetlania.
+
+```{r tibble}
+iris_tbl <- tbl_df(iris)
+print(iris_tbl)
+
+# Szybkie sprawdzenie typów zmiennych można zrobić również tak:
+sapply(iris, class)
+```
+
+## Rodzina funkcji *apply* (funkcjonały)
+
+Przedstawiona przed chwilą funkcja `sapply` jest członkiem szerokiej rodziny funkcji `apply`, która pełni niezwykle ważną rolę w **R**. Wszystkie funkcje z tej rodziny są tzw. funkcjonałami czyli funkcjami, które jako jeden z argumentów przyjmują inną funkcję, którą wykorzystują do przeprowadzenia odpowiednich operacji na innych obiektach przekazanych jako pozostałe argumenty.
+
+We wcześniejszym przykładzie ramka danych `iris` (traktowana w tych obliczeniach w rzeczywistości jak zwyczajna lista) służyła na dane, na których dokonywana obliczeń, zaś funkcja `class` (drugi argument) była funkcją, która wykorzystywała przekazana dane. Dokładniej rzecz biorą w tym przypadku dokonana operacja polegała na wywołaniu funkcji `class` na każdym elemencie przekazanej listy (czyli zmiennej w ramce danych `iris`). W ten sposób możliwe jest bardzo sprawne wyświetlenie nazw typów wszystkich zmiennych w zbiorze danych bez względu na liczbę tych zmiennych.
+
+Generalna zasada funkcji z rodziny *apply* polega więc na tym, że w pierwszym argumencie przyjmują one obiekt będący pewną kolekcją elementów (wektorem, listą itp.), a w drugim funkcje, która ma być wywołana po kolei na każdym elemencie tej kolekcji. Ostateczne wyniki również są zwracane w postaci odpowiedniej kolekcji elementów.
+
+```{r apply}
+### Najbardziej podstawowym przedstawicielem rodziny 'apply' jest funkcja 'lapply'.
+### Oczekuje ona obiekty podobnego do listy i dokonaniu określonej operacji na każdym jego elemencie
+### zwraca wyniki również w postai listy
+lapply(iris, class)
+
+### Funkcja 'sapply' działa tak samo jak 'lapply', ale tam gdzie to możliwe stara się zwrócić
+### dane w postaci uproszczonej (np. próbuje zwrócić prosty wektor zamiast listy).
+sapply(iris, class)
+
+### Ponadto jest również świetna funkcja 'tapply', która służy do wykonywania operacji
+### na podzbiorach pewnej kolekcji (określanych na podstawie innej kolekcji).
+### Pozwala ona na łatwe obliczenia w podgrupach.
+tapply(iris$Petal.Length, iris$Species, summary)
+
+### Godna uwagi jest również funkcja 'apply', która dostosowana jest do operacji
+### na wielowymiarowych tablicach (takich jak ramki danych, macierze czy nawet uogólnione tablice).
+### Jest ona w szczególności przydatna do liczenia wartości "po wierszach".
+###
+### Średnia z Sepal.Length, Sepal.Width, Petal.Length i Petal.Width dla pierwszych 6 obserwacji.
+apply(iris[, 1:4], 1, mean) %>%
+    head
+```
+
+<hr>
+
+<!-- CSS styling -->
+<style>
+    html {
+        height: 100%;
+        font-size: 62.5%;
+    }
+    body {
+        height: 100%;
+        font-size: 1.6em;
+        font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", sans-serif;
+    }
+    h1, h2, h3 {
+        text-align: center;
+    }
+    h4.author, h4.date {
+        margin: 0.75em 0 0 0;
+        text-align: center;
+    }
+    h2, h3, h4, h5, h6 {
+        margin: 2em 0 1em 0;
+    }
+    div#header {
+        margin: 1em 0 1em 0;
+    }
+    hr {
+        margin: 2em 0 2em 0;
+    }
+    pre {
+        margin-bottom: 2em;
+    }
+</style>
+
+<!-- End of styling -->
