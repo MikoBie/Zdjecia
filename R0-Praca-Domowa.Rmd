@@ -56,6 +56,23 @@ sum(odp2)==61
 ```
 
 
+#### Zad. 3. 
+
+1. Użyj techniki tablicowania (*lookup table*) i zamień poziomy zmiennej `Species` w zbiorze `iris` wedle następującego schematu:
+  * `setosa` --> `asotes`
+  * `versicolor` --> `rolocisrev`
+  * `virginica` --> `acinigriv`
+  
+```{r Zad3_odpowiedź}
+### Tu dodaj swój kod
+
+### Zapisz kolumnę 'Species' jako zmienną 
+odp1 <- NULL
+
+### Sprawdzenie odpowiedzi
+print(odp1)
+```
+
 
 <!-- CSS styling -->
 <style>
