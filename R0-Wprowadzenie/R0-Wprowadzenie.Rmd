@@ -170,7 +170,10 @@ Dodatkowo wektory elementy wektorów mogą być związane z nazwami. W takim prz
 # Najpierw stwórzmy czynnik
 set.seed(303)
 poziomy <- c("A", "B", "C", "D", "E", "F", "G", "H", "I", "J")
-czynnik <- factor(sample(poziomy, size = 10000, replace = TRUE), levels = poziomy)
+czynnik <- factor(
+    sample(poziomy, size = 10000, replace = TRUE), 
+    levels = poziomy
+)
 head(czynnik, n = 6)   # wyświetla pierwsze 6 elementów
 
 # Zdefiniujmy naszą 'lookup table'
