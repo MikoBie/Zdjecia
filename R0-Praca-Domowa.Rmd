@@ -17,15 +17,29 @@ output: html_notebook
 
 Tematem pracy domowej jest indeksowanie ramek danych i wykorzystywanie tych operacji do obliczania zagregowanych metryk, np. statystyk grupowych. Będziemy używać zbioru danych `iris`.
 
+*Podpowiedź ogólna:* przypominamy o korzystaniu z dokumentacji. Na przykład, żeby przeczytać dokumentację do funkcj `mean` wystarczy wpisać w konsoli komendę `?mean`.
+
 ### Indeksowanie
 
 #### Zad. 1.
 
-Zapisz ekwiwalent polecenia `head(iris)` za pomocą indeksowania ramki danych.
+1. Zapisz ekwiwalent polecenia `head(iris)` za pomocą indeksowania ramki danych.
+2. Zapisz ekwiwalent polecenia `head(iris, n = 10)` za pomocą indeksowania ramki danych.
+3. Zapisz ekwiwalent polecenia `tail(iris)` za pomocą indeksowania ramki danych (może się przydać funkcja `nrow`).
 
-*Podpowiedź*
+*Podpowiedź:* Składnia indeksowania --- `ramka[<indeks na wiersze>, <indeks na kolumny>]`, np. `iris[c(10, 15), c(1, 3)]`.
 
-Składnia indeksowania: `ramka[<indeks na wiersze>, <indeks na kolumny>]`, np. `iris[c(10, 15), c(1, 3)]`.
+```{r Zad1_odpowiedź}
+### Tu wpisujemy odpowiedzi
+odp1 <- NULL    # zamienić NULL na odpowiedź
+odp2 <- NULL
+odp3 <- NULL
+
+# Sprawdzenie odpowiedzi
+identical(odp1, head(iris))
+identical(odp2, head(iris, n = 10))
+identical(odp3, tail(iris))
+```
 
 
 <!-- CSS styling -->

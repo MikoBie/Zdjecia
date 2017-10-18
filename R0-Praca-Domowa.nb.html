@@ -187,13 +187,44 @@ $(document).ready(function () {
 <div id="praca-domowa" class="section level2">
 <h2>Praca domowa</h2>
 <p>Tematem pracy domowej jest indeksowanie ramek danych i wykorzystywanie tych operacji do obliczania zagregowanych metryk, np. statystyk grupowych. Będziemy używać zbioru danych <code>iris</code>.</p>
+<p><em>Podpowiedź ogólna:</em> przypominamy o korzystaniu z dokumentacji. Na przykład, żeby przeczytać dokumentację do funkcj <code>mean</code> wystarczy wpisać w konsoli komendę <code>?mean</code>.</p>
 <div id="indeksowanie" class="section level3">
 <h3>Indeksowanie</h3>
 <div id="zad.-1." class="section level4">
 <h4>Zad. 1.</h4>
-<p>Zapisz ekwiwalent polecenia <code>head(iris)</code> za pomocą indeksowania ramki danych.</p>
-<p><em>Podpowiedź</em></p>
-<p>Składnia indeksowania: <code>ramka[&lt;indeks na wiersze&gt;, &lt;indeks na kolumny&gt;]</code>, np. <code>iris[c(10, 15), c(1, 3)]</code>.</p>
+<ol style="list-style-type: decimal">
+<li>Zapisz ekwiwalent polecenia <code>head(iris)</code> za pomocą indeksowania ramki danych.</li>
+<li>Zapisz ekwiwalent polecenia <code>head(iris, n = 10)</code> za pomocą indeksowania ramki danych.</li>
+<li>Zapisz ekwiwalent polecenia <code>tail(iris)</code> za pomocą indeksowania ramki danych (może się przydać funkcja <code>nrow</code>).</li>
+</ol>
+<p><em>Podpowiedź:</em> Składnia indeksowania — <code>ramka[&lt;indeks na wiersze&gt;, &lt;indeks na kolumny&gt;]</code>, np. <code>iris[c(10, 15), c(1, 3)]</code>.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyMjIFR1IHdwaXN1amVteSBvZHBvd2llZHppXG5vZHAxIDwtIE5VTEwgICAgIyB6YW1pZW5pxIcgTlVMTCBuYSBvZHBvd2llZMW6XG5vZHAyIDwtIE5VTExcbm9kcDMgPC0gTlVMTFxuIyBTcHJhd2R6ZW5pZSBvZHBvd2llZHppXG5pZGVudGljYWwob2RwMSwgaGVhZChpcmlzKSlcbmBgYCJ9 -->
+<pre class="r"><code>### Tu wpisujemy odpowiedzi
+odp1 &lt;- NULL    # zamienić NULL na odpowiedź
+odp2 &lt;- NULL
+odp3 &lt;- NULL
+# Sprawdzenie odpowiedzi
+identical(odp1, head(iris))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIEZBTFNFXG4ifQ== -->
+<pre><code>[1] FALSE</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuaWRlbnRpY2FsKG9kcDIsIGhlYWQoaXJpcywgbiA9IDEwKSlcbmBgYCJ9 -->
+<pre class="r"><code>identical(odp2, head(iris, n = 10))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIEZBTFNFXG4ifQ== -->
+<pre><code>[1] FALSE</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuaWRlbnRpY2FsKG9kcDMsIHRhaWwoaXJpcykpXG5gYGAifQ== -->
+<pre class="r"><code>identical(odp3, tail(iris))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIEZBTFNFXG4ifQ== -->
+<pre><code>[1] FALSE</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
 <!-- CSS styling -->
 <style>
     html {
@@ -232,7 +263,7 @@ $(document).ready(function () {
 </div>
 </div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiUjAgfCBXcHJvd2FkemVuaWU6IHByYWNhIGRvbW93YSIKYXV0aG9yOiAiU3p5bW9uIFRhbGFnYSwgTWlrb8WCYWogQmllc2FnYSwgSVNTIFVXIgpkYXRlOiAiYHIgU3lzLkRhdGUoKWAiCm91dHB1dDogaHRtbF9ub3RlYm9vawotLS0KCjxocj4KCiogSW5kZWtzb3dhbmllIHJhbWVrIGRhbnljaAoqIFN0YXR5c3R5a2kgZ3J1cG93ZQoqIFRhYmxpY293YW5pZSAoKmxvb2t1cCB0YWJsZSopCiogc3VtbWFyeQoqIFBvZHpiacOzciByYW1raSArIHphcGlzICsgd2N6eXRhbmllCgojIyBQcmFjYSBkb21vd2EKClRlbWF0ZW0gcHJhY3kgZG9tb3dlaiBqZXN0IGluZGVrc293YW5pZSByYW1layBkYW55Y2ggaSB3eWtvcnp5c3R5d2FuaWUgdHljaCBvcGVyYWNqaSBkbyBvYmxpY3phbmlhIHphZ3JlZ293YW55Y2ggbWV0cnlrLCBucC4gc3RhdHlzdHlrIGdydXBvd3ljaC4gQsSZZHppZW15IHXFvHl3YcSHIHpiaW9ydSBkYW55Y2ggYGlyaXNgLgoKIyMjIEluZGVrc293YW5pZQoKIyMjIyBaYWQuIDEuCgpaYXBpc3ogZWt3aXdhbGVudCBwb2xlY2VuaWEgYGhlYWQoaXJpcylgIHphIHBvbW9jxIUgaW5kZWtzb3dhbmlhIHJhbWtpIGRhbnljaC4KCipQb2Rwb3dpZWTFuioKClNrxYJhZG5pYSBpbmRla3Nvd2FuaWE6IGByYW1rYVs8aW5kZWtzIG5hIHdpZXJzemU+LCA8aW5kZWtzIG5hIGtvbHVtbnk+XWAsIG5wLiBgaXJpc1tjKDEwLCAxNSksIGMoMSwgMyldYC4KCgo8IS0tIENTUyBzdHlsaW5nIC0tPgo8c3R5bGU+CiAgICBodG1sIHsKICAgICAgICBoZWlnaHQ6IDEwMCU7CiAgICAgICAgZm9udC1zaXplOiA2Mi41JTsKICAgIH0KICAgIGJvZHkgewogICAgICAgIGhlaWdodDogMTAwJTsKICAgICAgICBmb250LXNpemU6IDEuNmVtOwogICAgICAgIGZvbnQtZmFtaWx5OiAiVHJlYnVjaGV0IE1TIiwgIkx1Y2lkYSBHcmFuZGUiLCAiTHVjaWRhIFNhbnMgVW5pY29kZSIsICJMdWNpZGEgU2FucyIsIHNhbnMtc2VyaWY7CiAgICB9CiAgICBoMSwgaDIsIGgzIHsKICAgICAgICB0ZXh0LWFsaWduOiBjZW50ZXI7CiAgICB9CiAgICBoNC5hdXRob3IsIGg0LmRhdGUgewogICAgICAgIG1hcmdpbjogMC43NWVtIDAgMCAwOwogICAgICAgIHRleHQtYWxpZ246IGNlbnRlcjsKICAgIH0KICAgIGgyLCBoMywgaDQsIGg1LCBoNiB7CiAgICAgICAgbWFyZ2luOiAyZW0gMCAxZW0gMDsKICAgIH0KICAgIGRpdiNoZWFkZXIgewogICAgICAgIG1hcmdpbjogMWVtIDAgMWVtIDA7CiAgICB9CiAgICBociB7CiAgICAgICAgbWFyZ2luOiAyZW0gMCAyZW0gMDsKICAgIH0KICAgIHByZSB7CiAgICAgICAgbWFyZ2luLWJvdHRvbTogMmVtOwogICAgfQo8L3N0eWxlPgoKPGhyPgoKPCEtLSBFbmQgb2Ygc3R5bGluZyAtLT4=</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiUjAgfCBXcHJvd2FkemVuaWU6IHByYWNhIGRvbW93YSIKYXV0aG9yOiAiU3p5bW9uIFRhbGFnYSwgTWlrb8WCYWogQmllc2FnYSwgSVNTIFVXIgpkYXRlOiAiYHIgU3lzLkRhdGUoKWAiCm91dHB1dDogaHRtbF9ub3RlYm9vawotLS0KCjxocj4KCiogSW5kZWtzb3dhbmllIHJhbWVrIGRhbnljaAoqIFN0YXR5c3R5a2kgZ3J1cG93ZQoqIFRhYmxpY293YW5pZSAoKmxvb2t1cCB0YWJsZSopCiogc3VtbWFyeQoqIFBvZHpiacOzciByYW1raSArIHphcGlzICsgd2N6eXRhbmllCgojIyBQcmFjYSBkb21vd2EKClRlbWF0ZW0gcHJhY3kgZG9tb3dlaiBqZXN0IGluZGVrc293YW5pZSByYW1layBkYW55Y2ggaSB3eWtvcnp5c3R5d2FuaWUgdHljaCBvcGVyYWNqaSBkbyBvYmxpY3phbmlhIHphZ3JlZ293YW55Y2ggbWV0cnlrLCBucC4gc3RhdHlzdHlrIGdydXBvd3ljaC4gQsSZZHppZW15IHXFvHl3YcSHIHpiaW9ydSBkYW55Y2ggYGlyaXNgLgoKKlBvZHBvd2llZMW6IG9nw7NsbmE6KiBwcnp5cG9taW5hbXkgbyBrb3J6eXN0YW5pdSB6IGRva3VtZW50YWNqaS4gTmEgcHJ6eWvFgmFkLCDFvGVieSBwcnplY3p5dGHEhyBkb2t1bWVudGFjasSZIGRvIGZ1bmtjaiBgbWVhbmAgd3lzdGFyY3p5IHdwaXNhxIcgdyBrb25zb2xpIGtvbWVuZMSZIGA/bWVhbmAuCgojIyMgSW5kZWtzb3dhbmllCgojIyMjIFphZC4gMS4KCjEuIFphcGlzeiBla3dpd2FsZW50IHBvbGVjZW5pYSBgaGVhZChpcmlzKWAgemEgcG9tb2PEhSBpbmRla3Nvd2FuaWEgcmFta2kgZGFueWNoLgoyLiBaYXBpc3ogZWt3aXdhbGVudCBwb2xlY2VuaWEgYGhlYWQoaXJpcywgbiA9IDEwKWAgemEgcG9tb2PEhSBpbmRla3Nvd2FuaWEgcmFta2kgZGFueWNoLgozLiBaYXBpc3ogZWt3aXdhbGVudCBwb2xlY2VuaWEgYHRhaWwoaXJpcylgIHphIHBvbW9jxIUgaW5kZWtzb3dhbmlhIHJhbWtpIGRhbnljaCAobW/FvGUgc2nEmSBwcnp5ZGHEhyBmdW5rY2phIGBucm93YCkuCgoqUG9kcG93aWVkxbo6KiBTa8WCYWRuaWEgaW5kZWtzb3dhbmlhIC0tLSBgcmFta2FbPGluZGVrcyBuYSB3aWVyc3plPiwgPGluZGVrcyBuYSBrb2x1bW55Pl1gLCBucC4gYGlyaXNbYygxMCwgMTUpLCBjKDEsIDMpXWAuCgpgYGB7ciBaYWQxX29kcG93aWVkxbp9CiMjIyBUdSB3cGlzdWplbXkgb2Rwb3dpZWR6aQpvZHAxIDwtIE5VTEwgICAgIyB6YW1pZW5pxIcgTlVMTCBuYSBvZHBvd2llZMW6Cm9kcDIgPC0gTlVMTApvZHAzIDwtIE5VTEwKCiMgU3ByYXdkemVuaWUgb2Rwb3dpZWR6aQppZGVudGljYWwob2RwMSwgaGVhZChpcmlzKSkKaWRlbnRpY2FsKG9kcDIsIGhlYWQoaXJpcywgbiA9IDEwKSkKaWRlbnRpY2FsKG9kcDMsIHRhaWwoaXJpcykpCmBgYAoKCjwhLS0gQ1NTIHN0eWxpbmcgLS0+CjxzdHlsZT4KICAgIGh0bWwgewogICAgICAgIGhlaWdodDogMTAwJTsKICAgICAgICBmb250LXNpemU6IDYyLjUlOwogICAgfQogICAgYm9keSB7CiAgICAgICAgaGVpZ2h0OiAxMDAlOwogICAgICAgIGZvbnQtc2l6ZTogMS42ZW07CiAgICAgICAgZm9udC1mYW1pbHk6ICJUcmVidWNoZXQgTVMiLCAiTHVjaWRhIEdyYW5kZSIsICJMdWNpZGEgU2FucyBVbmljb2RlIiwgIkx1Y2lkYSBTYW5zIiwgc2Fucy1zZXJpZjsKICAgIH0KICAgIGgxLCBoMiwgaDMgewogICAgICAgIHRleHQtYWxpZ246IGNlbnRlcjsKICAgIH0KICAgIGg0LmF1dGhvciwgaDQuZGF0ZSB7CiAgICAgICAgbWFyZ2luOiAwLjc1ZW0gMCAwIDA7CiAgICAgICAgdGV4dC1hbGlnbjogY2VudGVyOwogICAgfQogICAgaDIsIGgzLCBoNCwgaDUsIGg2IHsKICAgICAgICBtYXJnaW46IDJlbSAwIDFlbSAwOwogICAgfQogICAgZGl2I2hlYWRlciB7CiAgICAgICAgbWFyZ2luOiAxZW0gMCAxZW0gMDsKICAgIH0KICAgIGhyIHsKICAgICAgICBtYXJnaW46IDJlbSAwIDJlbSAwOwogICAgfQogICAgcHJlIHsKICAgICAgICBtYXJnaW4tYm90dG9tOiAyZW07CiAgICB9Cjwvc3R5bGU+Cgo8aHI+Cgo8IS0tIEVuZCBvZiBzdHlsaW5nIC0tPg==</div>
 
 
 
