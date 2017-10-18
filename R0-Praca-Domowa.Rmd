@@ -40,6 +40,21 @@ identical(odp1, head(iris))
 identical(odp2, head(iris, n = 10))
 identical(odp3, tail(iris))
 ```
+##### Zad. 2
+
+W tym zadaniu trzeba będzie skorzystać tak naprawdę skorzystać z dwóch funkcji oraz indeksowania. Pierwsza funkcja to `mean()`, a druga to `table()`. Jak łatwo się domyślić `mean()` służy do liczenia średniej, natomiast `table()` zwraca liczebność powtarzających się wartości, tzn. jeśli mamy wektor `c("a","b","a")` to wtedy `table()` zwróci nam informację o tym, że "a" występuje w tym wektorze dwa razy, a "b" raz.
+
+1. Dla setosa policz wartości średnie dla zmiennych Sepal.Lenght, Sepal.Width, Petal.Length i Petal.Width
+2. Sprawdź jaki jest rozkład gatunków (przez rozkład rozumiemy częstości) dla Sepal.Length większego niż 6.
+
+```{r Zad2_odpowiedz}
+odp1 <- NULL
+odp2 <- NULL
+
+
+sum(odp2)==61  
+```
+
 
 
 <!-- CSS styling -->
