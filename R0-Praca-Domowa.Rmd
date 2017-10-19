@@ -49,7 +49,7 @@ W tym zadaniu trzeba będzie tak naprawdę skorzystać z dwóch funkcji oraz ind
 
 *Podpowiedź:* W obu zadaniach tak naprawdę efektem ma być labelled vector czyli taki wektor, który można indeksować zarówno po cyfrach jak i nazwach. Przykładem takiego wektoru jest drugi argument w funkcji `identical()`. Funkcja `table()` sama tworzy taki wektor.
 
-```{r Zad2_odpowiedz}
+```{r Zad2_odpowiedzi}
 # Trzeba zamienić NULL na w pierwszym przypadku wektor, w drugim 
 
 odp1 <- NULL
@@ -85,7 +85,7 @@ print(odp1)
 
 *Podpowiedź:* Do zapisywania i wczytywania plików csv służą funkcję 'write.csv()' i 'read.csv()'. Mają one miliard możliwych argumentów, żeby sprawdzić jakie wystarczy zajrzeć do dokumntacji poprzez wpisanie `?read.csv` lub `write.csv` do konsoli.
 
-```{r}
+```{r Zad4_odpowiedzi}
 ### Tutaj dodaj swój kod
 
 ramka <- NULL
