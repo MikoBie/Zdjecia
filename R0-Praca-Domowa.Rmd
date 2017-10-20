@@ -95,6 +95,18 @@ nrow(dane)==93
 ncol(dane)>ncol(ramka) # Dlaczego przed zapisaniem i po wczytaniu te ramki danych mają różną liczbę kolumn? Jak można rozwiązać ten problem?
 ```
 
+#### Zad. 5.
+
+1. Przeczytaj dokumentację funkcji `summary` i wywołaj ją na poniższych obiektach.
+
+```{r Zad5_odpowiedzi}
+x1 <- iris
+x2 <- iris$Sepal.Length
+x3 <- iris$Species					# Dodatkowo porównaj wynik `summary` z wynikiem `table`
+x4 <- as.character(iris$Species)	# Dodatkowo porównaj wynik `summary` z wynikiem `table`
+```
+
+
 <!-- CSS styling -->
 <style>
     html {
