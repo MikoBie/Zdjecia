@@ -10,8 +10,8 @@ output: html_notebook
 * Indeksowanie ramek danych
 * Statystyki grupowe
 * Tablicowanie (*lookup table*)
-* summary
 * Podzbiór ramki + zapis + wczytanie
+* `summary()`
 
 ## Praca domowa
 
