@@ -50,15 +50,14 @@ W tym zadaniu trzeba będzie tak naprawdę skorzystać z dwóch funkcji oraz ind
 *Podpowiedź:* W obu zadaniach tak naprawdę efektem ma być labelled vector czyli taki wektor, który można indeksować zarówno po cyfrach jak i nazwach. Przykładem takiego wektoru jest drugi argument w funkcji `identical()`. Funkcja `table()` sama tworzy taki wektor.
 
 ```{r Zad2_odpowiedzi}
-# Trzeba zamienić NULL na w pierwszym przypadku wektor, w drugim 
+### Zamień NULL na odpowiedź
 
 odp1 <- NULL
 odp2 <- NULL
 
+### Sprawdzenie odpowiedzi
 identical(odp1,c(Sepal.Length=5.006,Sepal.Width=3.428,Petal.Length=1.462,Petal.Width=0.246))
 sum(odp2)==61 
-
-
 ```
 
 
@@ -91,6 +90,7 @@ print(odp1)
 ramka <- NULL
 dane <- NULL
 
+### Sprawdzenie odpowiedzi
 nrow(dane)==93
 ncol(dane)>ncol(ramka) # Dlaczego przed zapisaniem i po wczytaniu te ramki danych mają różną liczbę kolumn? Jak można rozwiązać ten problem?
 ```
