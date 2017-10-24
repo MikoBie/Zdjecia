@@ -178,7 +178,7 @@ iris %>%
 Poniżej przedstawiamy kilka bardziej zaawansowanych przykładów zastosowań `dplyr` i przetwarzania potokowego.
 
 ```{r dplyr_agregacja2}
-### Pakiet rozszerzonego wsparcia przetwarzani potokowego
+### Pakiet rozszerzonego wsparcia przetwarzania potokowego
 library(magrittr)
 
 ### Agregacja wszystkich pozostałych zmiennych ilościowych 
@@ -203,9 +203,7 @@ iris %>%
         M = mean(Sepal.Length),
         w = 1 / (var(Sepal.Length) / n())
     ) %$%
-    {
-        sum(M * w) / sum(w)
-    }
+    { sum(M * w) / sum(w) }
 ```
 
 Bardzo przydatną w wielu przypadkach techniką są tzw. "złączenia" (*joins*). Cała rodzina tych metod jest bardzo bogata i pokrywa bardzo wiele operacji częściej bądź rzadziej przydatnych przy analizie danych. Tu omówimy jedynie trywialny (i trochę sztuczny) przypadek tzw. lewego złączenia (*left join*). Pozwala ono połączyć dwa zbior danych na podstawie jednej (bądź kilku) współdzielonych przez nie kolumn (tzw. kluczy).
@@ -267,6 +265,41 @@ tapply(iris$Petal.Length, iris$Species, summary)
 ### Średnia z Sepal.Length, Sepal.Width, Petal.Length i Petal.Width dla pierwszych 6 obserwacji.
 apply(iris[, 1:4], 1, mean) %>%
     head
+```
+
+## Pakiet _tidyr_
+
+Bardzo często spotykaną w praktyce operacją wykonywaną na ramkach danych jest zmiana kształtów, a dokładniej przekształcanie ramki pomiędzy tzw. postacią *długą* (_long_) i *szeroką* (_wide_). W zależności od kontekstu jedna bądź druga reprezentacja danych może być wygodniejsza, dlatego tak ważna jest umiejętność szybkiego przechodzenia między nimi. Zazwyczaj zamiana z formy długiej na szeroką (i *vice versa*) wiąże się z zmianą interpretacji wiersza w ramca danych. Innymi słowy przejście to zmienia jednostkę obserwacji jaka jest reprezentowana przez wiersz zbioru danych.
+
+```{r tidyr}
+library(tidyr)
+# Ponownie wykorzystamy pakiet `iris`
+# W swojej właściwej postaci jednostką obserwacji jest tu pojedynczy kwiat.
+head(iris)
+
+# Możemy sobie jednak wyobrazić sytuację, w której reprezentacja wykorzystująca
+# pomiar konkretnej cechy jako jednostkę obserwacji może być właściwsza.
+DF <- mutate(iris, id = row_number(Species)) %>%
+    gather(Feature, Measurement, Sepal.Length:Petal.Width)
+head(DF)    # View(DF)
+
+# Taka reprezentacja jest często przydatna np. przy wizualizowaniu danych,
+# gdyż w nowoczesnym podejściu do definiowania wykresów wykorzystuje się
+# zazwyczaj tylko jedną zmienną (kolumnę), którą jednak można w dość dowolny
+# sposób dzielić na grupy.
+# W takim kontekście reprezentacja `długa`, w której poszczególne zmienne
+# to kolejne grupy staje się naturalna.
+library(ggplot2)
+ggplot(DF, aes(x = Measurement, fill = Species)) +
+    geom_density(alpha = .6) +
+    facet_wrap(~ Feature, scales = "free")
+
+
+# I tak, jak powiedzieliśmy na początku, powrót od reprezentacji długiej do szerokiej
+# nie stanowi żadnego problemu (obie operacje są odwracalne i są swoimi odwrotnościami).
+DF2 <- DF %>%
+    spread(Feature, Measurement) %>%
+    select(-id)
 ```
 
 <hr>
