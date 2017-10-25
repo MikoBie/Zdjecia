@@ -1,0 +1,23 @@
+---
+title: "R Notebook"
+author: "Szymon Talaga, Mikołaj Biesaga, ISS UW"
+date: "`r Sys.Date()`"
+output: html_notebook
+---
+
+<hr>
+
+ * Przetwarzanie potokowe (`magrittr`)  [Mikołaj]
+ * Indeksowanie liczbowe i logiczne (`slice` i `filter`)    [Szymon]
+ * Wybieranie kolumn (`select`) [Mikołaj]
+ * Statystyki grupowe (`group_by` i `summarize`)    [Mikołaj]
+ * Rekodowanie zmiennych (`case_when` + może coś jeszcze)   [Szymon]
+ * Tworzenie nowych zmiennych (`mutate`)    [Mikołaj]
+ * Joiny (`left_join` + koledzy)    [Szymon]
+
+## Praca domowa
+
+Tematem pracy domowej ponownie są operacje na ramkach danych. Jednak tym razem będziemy wykorzystywać w tym celu funkcje z pakietu *dplyr*.
+
+Ponownie przypominamy o korzystaniu z dokumentacji.
+
