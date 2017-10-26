@@ -14,10 +14,80 @@ output: html_notebook
  * Rekodowanie zmiennych (`case_when` + może coś jeszcze)   [Szymon]
  * Tworzenie nowych zmiennych (`mutate`)    [Mikołaj]
  * Joiny (`left_join` + koledzy)    [Szymon]
+ 
+```{r wczytanie_pakietu_dplyr}
+library(dplyr)  # pakiet należy wcześniej zainstalować 
+```
 
 ## Praca domowa
 
-Tematem pracy domowej ponownie są operacje na ramkach danych. Jednak tym razem będziemy wykorzystywać w tym celu funkcje z pakietu *dplyr*.
+Tematem pracy domowej ponownie są operacje na ramkach danych. Jednak tym razem będziemy wykorzystywać w tym celu funkcje z pakietu *dplyr*. Tak jak zwykle będziemy wykorzystywać tu zbiór danych `iris`. Przy wykonywaniu ćwiczeń zachęcamy do stosowania notacji przetwarzania potokowego (operator `%>%`).
 
 Ponownie przypominamy o korzystaniu z dokumentacji.
 
+## Zad 2.
+
+W tym zadaniu przyjrzymy się indeksowaniu ramek danych za pomocą indeksów liczbowych i logicznych. W ćwiczeniu należy wykorzystać funkcje `slice` i `filter`. Funkcja `filter` nie była omówiona na warsztatach (nasze niedopatrzenie, za co przepraszamy!), dlatego wykonanie ćwiczenia należy rozpocząć od zapoznania się z dokumentacją funkcji `filter` (`?filter`). W szczególności polecamy zapoznać się z podanymi w dokumentacji przykładami.
+
+Przypominamy, że indeksowania liczbowego służy funkcja `slice` a do indeksowania logicznego funckja `filter`.
+
+ 1. Wyświetl pierwsze 12 wierszy zbioru danych `iris`.
+ 2. Wyświetl 1, 3, 5, 7, 9 itd. obserwacje. *Podpowiedź:* warto zapoznać się z funkcją `seq`.
+ 3. Wybierz obserwacje, dla których zmienna `Species` przyjmuje wartości `setosa`.
+ 4. Wybierz obserwacje, dla których zmienna `Species` przyjmuje wartości `setosa` albo `versicolor`.
+ 5. Wybierz obserwacje gatunku`virginica` o wartościach `Petal.Length` większych od 4 (są dwa równoważne sposoby wywołania funkcji `filter` w tym przypadku, jakie?).
+ 
+```{r Zad2_odpowiedź}
+# Tu wpisujemy odpowiedzi
+odp1 <- NULL
+odp2 <- NULL
+odp3 <- NULL
+odp4 <- NULL
+odp5 <- NULL
+
+# Sprawdzenie odpowiedzi
+all.equal(odp1, iris[1:12, ], check.attributes = FALSE)
+# zadania 2 tu nie sprawdzimy, żeby nie podpowiadać.
+all.equal(odp3, iris[iris$Species == "setosa", ])
+# zadań 4 i 5 też tu nie sprawdzmy, żeby nie podpowiadać.
+```
+ 
+## Zad 5.
+
+To zadanie poświęcone jest rekodowaniu zmiennych. Wykorzystamy w nim poznaną na zajęciach funkcję `case_when` oraz przedstawimy nową funkcję `recode` (obie są częścią pakietu *dplyr*).
+
+ 1. Użyj funkcji `case_when` do stworzenia zmiennej będącej dyskretyzajcją zmiennej `Sepal.Width` ze zbioru `iris`. Należy przyjąć podział na dwie grupy: wartości mniejsze od mediany nazwać należy `"low"` a pozostałe `"high"`. Do obliczenia mediany można wykorzystać poznaną na warsztatach funkcję `quantile` lub bardziej wyspecjalizowaną funkcję `median`.
+ 2. Zamień nazwy gatunków w zmiennej `Species` w dowolny sposób. Zadanie to można wykonać zarówno przy użyciu funkcji `case_when` jak i funkcji `recode`. W ramach samokształcenia polecamy wykorzystać funkcję `recode`, bo nie była ona omówiona na zajęciach (oczywiście najpierw poleca się zajrzeć do dokumentacji!)
+ 3. Zrekoduj zmienną `Species` tak, aby gatunek `setosa` pozostał niezmieniony a gatunki `virginica` i `versicolor` zostały połączone w jeden gatunek nazwany `mutant`. Ponownie można tu wykorzystać zarówno `case_when` jak i `recode`. Polecamy spróbować rozwiązać to zadanie na dwa sposoby (zerknięcie do dokumentacji może być jak zwykle bardzo pomocne!).
+ 
+```{r Zad3_odpowiedź}
+# Tu wpisujemy odpowiedzi
+odp1 <- NULL
+odp2 <- NULL
+odp3 <- NULL
+
+# Sprawdzenie odpowiedzi
+identical(odp1, ifelse(iris$Sepal.Width < median(iris$Sepal.Width), "low", "else"))
+# zadania 2 i 3 nie sprawdzamy, żeby nie dawać podpowiedzi
+```
+
+## Zad 7.
+
+W tym zadaniu przyjrzymy się złączeniom (*joins*). Wykorzystamy tu sztucznie stworzone dane przedstawiające wyniki pewnego prostego eksperymentu.
+
+```{r Zad7_dane}
+### Ramka danych `Respondenci` zawiera w sobie dane osobowe trzech wymyślonych osób badanych.
+Respondenci <- data.frame(
+    id = c(1, 2, 3),  # identyfikator osoby badanej
+    imię = c("Jan", "Anna", "Maria"),
+    nazwisko = c("Kowalski", "Boleyn", "Mazur")
+)
+# Ramka danych zawiera dane dotyczące czasu i jakości wykonania pewnego zadania (respondenci mogli próbować więcej niż raz)
+Wyniki <- data.frame(
+    id = c(1, 1, 2, 2, 2, 2, 3, 3, 4, 4, 4),
+    czas = c(10, 12, 20, 18, 25, 10, 8, 7, 9, 9, 14),
+    wykonanie = c(5, 5, 4, 3, 5, 5, 4, 5, 3, 4, 5)
+)
+```
+
+Nie zadajemy tu konkretnych zadań. Zamiast tego polecamy sie zapoznać z (bardzo przystępną) dokumentacją metod z rodziny `join` (`?join`) i potestować różne możliwości. W szczególności polecamy sprawdzić jak działają metody: `left_join`, `inner_join` i `anti_join`. Warto również przetestować, jakie konsekwencje ma zamienianie ramek danych (czyli argumentów `x` i `y`) miejscami.
