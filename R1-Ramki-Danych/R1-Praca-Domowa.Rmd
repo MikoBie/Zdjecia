@@ -25,6 +25,44 @@ Tematem pracy domowej ponownie są operacje na ramkach danych. Jednak tym razem 
 
 Ponownie przypominamy o korzystaniu z dokumentacji.
 
+### 1. Przetwarzanie potokowe
+
+Głównym zadaniem w tej części będzie zamienienie kodu w klasycznej formie na przetwarzania potokowe.
+
+1. Stwórz ramkę danych `madra_ramka` składającą się z trzech wierszy i trzech kolumn. W pierwszej kolumnie `Species` mają być zapisane jako faktory gatunki. W drugiej kolumnie `Sepal.Width.mean` średnie dla gatunków, a w trzeciej `Sepal.Width.sd` odchylenia standardowe.
+
+*Podpowiedź:* Do liczenia odchylenia standardowego można użyć funkcji `sd()`
+```{r}
+### Trzeba pamiętać o załadowaniu pakietów
+library(dplyr) # pakiet ze wszystkimi przydatnymi funkcjami typu summarise, select, group_by itp.
+library(magrittr) # pakiet do przetwarzania potokowego
+library(tibble)
+
+### Macie uzyskać taką ramkę danych jak ta poniższa tylko używając przetwarzania potokowego
+
+(glupia_ramka <- data.frame(Species=factor(c("setosa","versicolor","virginica")),Sepal.Width.mean=aggregate(iris$Sepal.Width,by=list(iris$Species),mean)$x,Sepal.Width.sd=aggregate(iris$Sepal.Width,by=list(iris$Species),sd)$x))
+
+### Wpisz tu rozwiązanie
+
+madra_ramka <- iris %>%
+  group_by(Species) %>%
+  summarise(Sepal.Width.mean=mean(Sepal.Width),
+            Sepal.Width.sd=sd(Sepal.Width))
+
+
+
+as.data.frame(glupia_ramka)==as.data.frame(madra_ramka)
+
+
+sprintf("%.54f",glupia_ramka[2,3])
+sprintf("%.54f",madra_ramka[2,3])
+
+identical(glupia_ramka,madra_ramka)
+
+glupia_ramka
+madra_ramka
+```
+
 ## Zad 2.
 
 W tym zadaniu przyjrzymy się indeksowaniu ramek danych za pomocą indeksów liczbowych i logicznych. W ćwiczeniu należy wykorzystać funkcje `slice` i `filter`. Funkcja `filter` nie była omówiona na warsztatach (nasze niedopatrzenie, za co przepraszamy!), dlatego wykonanie ćwiczenia należy rozpocząć od zapoznania się z dokumentacją funkcji `filter` (`?filter`). W szczególności polecamy zapoznać się z podanymi w dokumentacji przykładami.
