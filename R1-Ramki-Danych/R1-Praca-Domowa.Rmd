@@ -17,6 +17,7 @@ output: html_notebook
  
 ```{r wczytanie_pakietu_dplyr}
 library(dplyr)  # pakiet należy wcześniej zainstalować 
+library(magrittr) # pakiet do przetwarzania potokowego
 ```
 
 ## Praca domowa
@@ -25,42 +26,21 @@ Tematem pracy domowej ponownie są operacje na ramkach danych. Jednak tym razem 
 
 Ponownie przypominamy o korzystaniu z dokumentacji.
 
-### 1. Przetwarzanie potokowe
+## Zad 1.
 
-Głównym zadaniem w tej części będzie zamienienie kodu w klasycznej formie na przetwarzania potokowe.
+Za pomocą przetwarzania potokowego zapisz poniższe przekształcenia (nie mają one większego sensu, ale warto poćwiczyć):
+ 
+ 1. `mean(iris[,2])`
+ 2. `iris[,3]+iris[,"Sepal.Length"]`
+ 3. `table(iris$Species)`
+ 4. `mean(c(mean(iris$Sepal.Width),mean(iris[,1])))`
+ 5. `(mean(iris[,"Sepal.Length"])-iris$Sepal.Length)/sd(iris[,1])`
+ 
+*Podpowiedź:* W tych zadaniach chodzi o wykorzystanie `%>%` i `%$%`
+ 
+```{r Zad1_odpowiedź}
+# Wpisz tutaj swój kod. Nie ma sprawdzenia bo można sobie samemu sprawdzić wklejając kod z poleceń.
 
-1. Stwórz ramkę danych `madra_ramka` składającą się z trzech wierszy i trzech kolumn. W pierwszej kolumnie `Species` mają być zapisane jako faktory gatunki. W drugiej kolumnie `Sepal.Width.mean` średnie dla gatunków, a w trzeciej `Sepal.Width.sd` odchylenia standardowe.
-
-*Podpowiedź:* Do liczenia odchylenia standardowego można użyć funkcji `sd()`
-```{r}
-### Trzeba pamiętać o załadowaniu pakietów
-library(dplyr) # pakiet ze wszystkimi przydatnymi funkcjami typu summarise, select, group_by itp.
-library(magrittr) # pakiet do przetwarzania potokowego
-library(tibble)
-
-### Macie uzyskać taką ramkę danych jak ta poniższa tylko używając przetwarzania potokowego
-
-(glupia_ramka <- data.frame(Species=factor(c("setosa","versicolor","virginica")),Sepal.Width.mean=aggregate(iris$Sepal.Width,by=list(iris$Species),mean)$x,Sepal.Width.sd=aggregate(iris$Sepal.Width,by=list(iris$Species),sd)$x))
-
-### Wpisz tu rozwiązanie
-
-madra_ramka <- iris %>%
-  group_by(Species) %>%
-  summarise(Sepal.Width.mean=mean(Sepal.Width),
-            Sepal.Width.sd=sd(Sepal.Width))
-
-
-
-as.data.frame(glupia_ramka)==as.data.frame(madra_ramka)
-
-
-sprintf("%.54f",glupia_ramka[2,3])
-sprintf("%.54f",madra_ramka[2,3])
-
-identical(glupia_ramka,madra_ramka)
-
-glupia_ramka
-madra_ramka
 ```
 
 ## Zad 2.
@@ -89,7 +69,56 @@ all.equal(odp1, iris[1:12, ], check.attributes = FALSE)
 all.equal(odp3, iris[iris$Species == "setosa", ])
 # zadań 4 i 5 też tu nie sprawdzmy, żeby nie podpowiadać.
 ```
- 
+
+## Zad 3.
+
+Przygodę z tymi zadaniami proponujemy rozpocząć od wpisania w konsole `?select()` i zapoznania się z dokumentacją tej funkcji. Zwłaszcza z częścią "Useful functions"
+
+1. Używając przetwarzania potokowego zsumuj wszystkie wartości zmiennych zaczynających się od "Petal"
+2. Używając przetwarzania potokowego policz średnią dla `Sepal.Length` i `Petal.Length`
+3. Używając przetwarzania potokowego policz sumy we wszystkich kolumnach, które zawierają "." w nazwie
+4. Zmień nazwę `Species` na `Gatunki`, natomiast resztę pozostaw niezmienioną
+
+*Podpowiedź:* W funkcji rename tak samo jak przy lookup table najpierw należy napisać nową nazwę potem starą.    
+
+
+```{r Zad3_odpowiedź}
+# Tutaj wpisz odpowiedzi
+
+odp1 <- NULL
+odp2 <- NULL
+odp3 <- NULL
+odp4 <- NULL
+
+# Sprawdzenie
+
+odp1==sum(iris$Petal.Length+iris$Petal.Width)
+odp2==c(Sepal.Length=mean(iris$Sepal.Length),Sepal.Length=mean(iris$Petal.Length))
+odp3==colSums(iris[,c(1:4)])
+colnames(odp4)==c("Sepal.Length","Sepal.Width","Petal.Length","Petal.Width","Gatunki")
+
+```
+
+
+## Zad 4.
+
+W tym zadaniu głównie skupimy się na funkcjach `group_by` oraz `summarise`.
+
+Stwórz ramkę danych `madra_ramka` składającą się z trzech wierszy i trzech kolumn. W pierwszej kolumnie `Species` gatunki mają być zapisane jako faktory. W drugiej kolumnie `Sepal.Width.mean` - średnie dla gatunków, a w trzeciej `Sepal.Width.sd` - odchylenia standardowe dla gatunków.
+
+
+```{r Zad4_odpowiedź}
+#Ogólnie chodzi o to, żeby otrzymać taką ramkę za pomocą przetwarzania potkowego
+glupia_ramka <- data.frame(Species=factor(c("setosa","versicolor","virginica")),Sepal.Width.mean=aggregate(iris$Sepal.Width,by=list(iris$Species),mean)$x,Sepal.Width.sd=aggregate(iris$Sepal.Width,by=list(iris$Species),sd)$x)
+
+# Wpisz tu rozwiązanie
+madra_ramka <- NULL
+
+
+
+all.equal(glupia_ramka,madra_ramka,check.attributes = FALSE)
+```
+
 ## Zad 5.
 
 To zadanie poświęcone jest rekodowaniu zmiennych. Wykorzystamy w nim poznaną na zajęciach funkcję `case_when` oraz przedstawimy nową funkcję `recode` (obie są częścią pakietu *dplyr*).
@@ -98,7 +127,7 @@ To zadanie poświęcone jest rekodowaniu zmiennych. Wykorzystamy w nim poznaną 
  2. Zamień nazwy gatunków w zmiennej `Species` w dowolny sposób. Zadanie to można wykonać zarówno przy użyciu funkcji `case_when` jak i funkcji `recode`. W ramach samokształcenia polecamy wykorzystać funkcję `recode`, bo nie była ona omówiona na zajęciach (oczywiście najpierw poleca się zajrzeć do dokumentacji!)
  3. Zrekoduj zmienną `Species` tak, aby gatunek `setosa` pozostał niezmieniony a gatunki `virginica` i `versicolor` zostały połączone w jeden gatunek nazwany `mutant`. Ponownie można tu wykorzystać zarówno `case_when` jak i `recode`. Polecamy spróbować rozwiązać to zadanie na dwa sposoby (zerknięcie do dokumentacji może być jak zwykle bardzo pomocne!).
  
-```{r Zad3_odpowiedź}
+```{r Zad5_odpowiedź}
 # Tu wpisujemy odpowiedzi
 odp1 <- NULL
 odp2 <- NULL
@@ -109,6 +138,29 @@ identical(odp1, ifelse(iris$Sepal.Width < median(iris$Sepal.Width), "low", "else
 # zadania 2 i 3 nie sprawdzamy, żeby nie dawać podpowiedzi
 ```
 
+## Zad 6.
+
+Tak jak zawsze warto zacząć od przeczytania dokumentacji funckji `mutate()`
+
+1. Do `iris` dodaj nową zmienną "Gatunki", w której nazwy ze zmiennej `Species` zostaną zamienione na następujące:
+      setosa <= kwiatek 1
+      versicolor <= kwiatek 2
+      virginica <= kwiatek 3
+2. Policz średnią i odchylenie Petal.Length dla wszystkich kwiatków. Oczywiście chodzi o to, żeby stworzyć taką ramkę danych jak w Zad 4. (tą mądrą).
+
+*Podpowiedź:* Warto tutaj wykorzystać lookup table.
+      
+```{r}
+# Przypomnienie Lookup table. Zamiana pierwszych trzech liter polskich na greckie.
+
+wektor <- sample(LETTERS[1:3],1000,replace = T)
+lookup_vecotr <- c(A="Alfa",B="Beta",C="Gamma")
+grecki_wektor <- lookup_vecotr[wektor]
+grecki_wektor <- unname(grecki_wektor)
+
+# Tutaj trzeba wpisać kod
+
+```
 ## Zad 7.
 
 W tym zadaniu przyjrzymy się złączeniom (*joins*). Wykorzystamy tu sztucznie stworzone dane przedstawiające wyniki pewnego prostego eksperymentu.
