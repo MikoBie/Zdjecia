@@ -1,0 +1,166 @@
+---
+title: "R0 | Wprowadzenie: praca domowa"
+author: "Szymon Talaga, Mikołaj Biesaga, ISS UW"
+date: "`r Sys.Date()`"
+output: html_notebook
+---
+
+<hr>
+
+* Indeksowanie ramek danych
+* Statystyki grupowe
+* Tablicowanie (*lookup table*)
+* Podzbiór ramki + zapis + wczytanie
+* `summary()`
+
+## Praca domowa
+
+Tematem pracy domowej jest indeksowanie ramek danych i wykorzystywanie tych operacji do obliczania zagregowanych metryk, np. statystyk grupowych. Będziemy używać zbioru danych `iris`.
+
+*Podpowiedź ogólna:* przypominamy o korzystaniu z dokumentacji. Na przykład, żeby przeczytać dokumentację do funkcj `mean` wystarczy wpisać w konsoli komendę `?mean`.
+
+### Indeksowanie
+
+#### Zad. 1.
+
+1. Zapisz ekwiwalent polecenia `head(iris)` za pomocą indeksowania ramki danych.
+2. Zapisz ekwiwalent polecenia `head(iris, n = 10)` za pomocą indeksowania ramki danych.
+3. Zapisz ekwiwalent polecenia `tail(iris)` za pomocą indeksowania ramki danych (może się przydać funkcja `nrow`).
+
+*Podpowiedź:* Składnia indeksowania --- `ramka[<indeks na wiersze>, <indeks na kolumny>]`, np. `iris[c(10, 15), c(1, 3)]`.
+
+```{r Zad1_odpowiedź}
+### Tu wpisujemy odpowiedzi
+odp1 <- iris[c(1:6),]    # zamienić NULL na odpowiedź
+odp2 <- iris[c(1:10),]
+odp3 <- iris[c((nrow(iris)-5):nrow(iris)),]
+
+# Sprawdzenie odpowiedzi
+identical(odp1, head(iris))
+identical(odp2, head(iris, n = 10))
+identical(odp3, tail(iris))
+```
+##### Zad. 2
+
+W tym zadaniu trzeba będzie tak naprawdę skorzystać z dwóch funkcji oraz indeksowania. Pierwsza funkcja to `mean()`, a druga to `table()`. Jak łatwo się domyślić `mean()` służy do liczenia średniej, natomiast `table()` zwraca liczebność powtarzających się wartości, tzn. jeśli mamy wektor `c("a","b","a")` to wtedy `table()` zwróci nam informację o tym, że "a" występuje w tym wektorze dwa razy, a "b" raz.
+
+1. Dla setosa policz wartości średnie dla zmiennych `Sepal.Lenght`, `Sepal.Width`, `Petal.Length` i `Petal.Width`
+2. Sprawdź jaki jest rozkład gatunków (przez rozkład rozumiemy częstości) dla Sepal.Length większego niż 6.
+
+*Podpowiedź:* W obu zadaniach tak naprawdę efektem ma być labelled vector czyli taki wektor, który można indeksować zarówno po cyfrach jak i nazwach. Przykładem takiego wektoru jest drugi argument w funkcji `identical()`. Funkcja `table()` sama tworzy taki wektor.
+
+```{r Zad2_odpowiedzi}
+### Zamień NULL na odpowiedź
+
+Sepal.Length <- mean(iris[iris$Species=="setosa","Sepal.Length"])
+Sepal.Width <- mean(iris[iris$Species=="setosa","Sepal.Width"])
+Petal.Length <- mean(iris[iris$Species=="setosa","Petal.Length"])
+Petal.Width <- mean(iris[iris$Species=="setosa","Petal.Width"])
+
+odp1 <- c(Sepal.Length=Sepal.Length,Sepal.Width=Sepal.Width,Petal.Length=Petal.Length,Petal.Width=Petal.Width)
+# szczerze mówiąc nie wiem czy można wyobrazić sobie gorsze rozwiązanie tego zadania, tzn. gorsze by było tylko gdyby zamiast stworzyć oddzielne zmienne wcisnąć wszystko do jednego wektora. Dużo łatwiej rozwiązać to zadanie można za pomocą czy to funkcji apply() czy to przetwarzania potokowego.
+  
+odp2 <- table(iris[iris$Sepal.Length>6,"Species"])
+# tutaj też można to zadanie w zdecydowanie bardziej czytelny sposób rozwiązać
+
+### Sprawdzenie odpowiedzi
+identical(odp1,c(Sepal.Length=5.006,Sepal.Width=3.428,Petal.Length=1.462,Petal.Width=0.246))
+sum(odp2)==61 
+```
+
+
+#### Zad. 3. 
+
+1. Użyj techniki tablicowania (*lookup table*) i zamień poziomy zmiennej `Species` w zbiorze `iris` wedle następującego schematu:
+  * `setosa` --> `asotes`
+  * `versicolor` --> `rolocisrev`
+  * `virginica` --> `acinigriv`
+  
+```{r Zad3_odpowiedź}
+### Tu dodaj swój kod
+
+lookup_vector <- c(setosa="asotes",rolocisrev="versicolor",virginica="acinigriv")
+iris_mod <- iris # zapisuje sobię iris jako iris_mod, żeby nie trzeba było jeszcze raz wczytywać iris. Jeśli zmienimy na oryginalnym zbiorze iris, to przed następnym zadaniem będziemy musieli wykonać funkcję data(iris), która wczyta nam jeszcze raz oryginalny zbiór danych
+iris_mod$Species <- unname(lookup_vector[iris_mod$Species])# unname() pełni tutaj funkcję tylko kosmetyczną
+
+### Zapisz kolumnę 'Species' jako zmienną 
+odp1 <- iris_mod
+
+### Sprawdzenie odpowiedzi
+print(odp1)
+```
+
+#### Zad. 4.
+
+1. Ze zbioru danych `iris` zapisz w oddzielnej ramce danych "ramka" kolumny `Sepal.Length`, `Sepal.Width` oraz `Species` dla `Petal.Width` większego niż 1. Następnie zapisz tę ramkę danych na dysku jako plik ramka.csv, a potem wczytaj ją jako ramkę danych o nazwie "dane".
+
+*Podpowiedź:* Do zapisywania i wczytywania plików csv służą funkcję `write.csv()` i `read.csv()`. Mają one miliard możliwych argumentów, żeby sprawdzić jakie wystarczy zajrzeć do dokumntacji poprzez wpisanie `?read.csv` lub `write.csv` do konsoli.
+
+```{r Zad4_odpowiedzi}
+### Tutaj dodaj swój kod
+
+ramka <- iris[iris$Petal.Width>1,c("Sepal.Length","Sepal.Width","Species")]
+write.csv(ramka,"ramka.csv")
+dane <- read.csv("ramka.csv")
+
+### Sprawdzenie odpowiedzi
+nrow(dane)==93
+ncol(dane)>ncol(ramka) # Dlaczego przed zapisaniem i po wczytaniu te ramki danych mają różną liczbę kolumn? Jak można rozwiązać ten problem?
+
+# W write.csv() defultowo jest ustawione, że zapisuje też nazwy wierszy. Można to zmienić podając jako argument tej funkcji row.names=FALSE
+```
+
+#### Zad. 5.
+
+1. Przeczytaj dokumentację funkcji `summary` i wywołaj ją na poniższych obiektach.
+
+```{r Zad5_odpowiedzi}
+x1 <- iris
+x2 <- iris$Sepal.Length
+x3 <- iris$Species					# Dodatkowo porównaj wynik `summary` z wynikiem `table`
+x4 <- as.character(iris$Species)	# Dodatkowo porównaj wynik `summary` z wynikiem `table`
+
+summary(x1)
+summary(x2)
+summary(x3)
+table(x3)
+summary(x4)
+table(x4)
+```
+
+
+<!-- CSS styling -->
+<style>
+    html {
+        height: 100%;
+        font-size: 62.5%;
+    }
+    body {
+        height: 100%;
+        font-size: 1.6em;
+        font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", sans-serif;
+    }
+    h1, h2, h3 {
+        text-align: center;
+    }
+    h4.author, h4.date {
+        margin: 0.75em 0 0 0;
+        text-align: center;
+    }
+    h2, h3, h4, h5, h6 {
+        margin: 2em 0 1em 0;
+    }
+    div#header {
+        margin: 1em 0 1em 0;
+    }
+    hr {
+        margin: 2em 0 2em 0;
+    }
+    pre {
+        margin-bottom: 2em;
+    }
+</style>
+
+<hr>
+
+<!-- End of styling -->
