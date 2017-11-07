@@ -1,0 +1,231 @@
+---
+title: "R2 | Modele Liniowe"
+author: "Mikołaj Biesaga, Szymon Talaga, ISS UW"
+date: '`r Sys.Date()`'
+output:
+  html_notebook:
+    toc: true
+  html_document:
+    toc: true
+---
+
+<hr>
+
+```{r basic_packages}
+suppressPackageStartupMessages({
+    library(magrittr)
+    library(dplyr)
+})
+```
+
+## Wprowadzenie
+
+Ogólny model liniowe jest prawdopodobnie najważniejszym modelem zależności między zmiennymi w całej stosowanej statystyce. Jego proste uogólnienia pozwalają na analizę bardzo wiely różnych scenariuszy i układów zmiennych (w tym również zmiennych porządkowych i jakościowych). Jest on również podstawą, na której zbudowana jest znaczna część najważniejszych metod nieliniowych. Dlatego poświęcimy mu tu dość dużo miejsca.
+
+### Podstawy modeli liniowych w `R`
+
+W pierwszej części skupimy się na praktycznym wprowadzeniu do modeli liniowych w `R` tak, aby każdy mógł się najpierw zaznajomić na podstawowym poziomie ze specyfiką ich wykorzystywania w środowisku obliczeniowym języka `R`. Najpierw jednak przypomnimy podstawową strukturę każdego modelu liniowego. Najbardziej podstawowym modelem linoiwym jest prosta jednozmiennowa regresja liniowa, która opisana jest równaniem:
+
+$$y_i = b_0 + b_1x_i + e_i$$
+gdzie:
+
+ * $y_i$ to wartość zmiennej zależnaj dla $i$-tej obserwacji
+ * $x_i$ to wartość zmiennej niezależnej dla $i$-tej obserwacji
+ * $b_0$ to stała równania regresji
+ * $b_1$ to współczynnik kierunkowy zmiennej niezależnej
+ * $e_i$ to reszta równania regresji dla $i$-tej obserwacji
+
+Powyższe to zatem po prostu równanie funkcji liniowej w jednej zmiennej z dodanym błędem określającym odchylenie linii regresji od rzeczywistej wartości zmiennej zależnej.
+
+Model jednozmiennowy w naturalny sposób uogólnia się do modelu wielozmiennowego, czyli:
+
+$$y_i = b_0 + b_1x^{(1)}_i + \ldots + b_mx^{(m)}_i + e_i$$
+
+Tyle słowem wstępu. Dokładne założenia oraz mechanikę modeli liniowych omówimy w kolejnej części. Teraz skupimy się na praktycznym wykorzystaniu tego modelu w `R`. W tym podstawowym wprowadzeniu dalej będziemy używać dobrze nam znanego zbioru danych `iris` (choć w dalszej części zaczniemy sięgać po inne, bardziej złożone zbiory danych, które pozwolą nam zilustrować niektóre ważne właściwości różnych modeli).
+
+#### Definiowanie prostych modeli
+
+Modele liniowe w `R` (a tak naprawdę większość modeli statystycznych) jest związana z tzw. interefejsem formułowym. Jest to niezwykle wygodne narzędzie, które pozwala na bardzo czytelne definiowanie obiektów modeli.
+
+```{r lm_univariate_formula}
+### Model liniowej zależności między długością płatka (Sepal.Length)
+### jako zmienną zależną a długością kielicha (Petal.Length)
+model1 <- lm(Sepal.Length ~ Petal.Length, data = iris)
+
+### Co się powyżej wydarzyło? Rozłóżmy powyższe wywołanie na części pierwsze
+###
+### 1. Po prawej stronie operator przypisania (`<-`) mamy wywołanie funkcji `lm`.
+### 2. `lm` to funkcja tworząca obiekt modelu liniowego (warto zerknąć do dokumentacji, `?lm`)
+### 3. Zawsze pierwszym argumentem funkcji `lm` jest tzw. formuła;
+###    tutaj jest to wyrażenie `Sepal.Length ~ Petal.Length`.
+### 4. Po prawej strony operatora `~` mamy zmienną zależną (tak jak w równaniu regresji)
+### 5. Po lewej stronie mamy zmienną niezależną (też dokładnie tak jak w równaniu regresji)
+### 6. Ostatnim (bardzo ważnym elementem) wywołania funkcji `lm` jest argument `data`.
+###    Określa on w jakim zbiorze danych `R` ma szukać nazw, których użyto w formule
+###    (zauważmy, że przekazujemy te nazwy jako nazwy obiektów, więc R musi wiedzieć,
+###     gdzie szukać przypisanych im wartości).
+
+### Teraz zobaczmy, co mówi na taki model liniowy, jak każemy wypisać go w konsoli
+model1
+```
+
+Efekt wypisania modelu już coś nam mówi, ale tak naprawdę niewiele. Pokazuje jedynie jak wywołano funkcję, która stowrzyła ten obiekt oraz wartości oszacowanych współczynników (`(Intercept)` to oczywiście stała równania regresji). Chcielibyśmy jednak uzyskać więcej informacji, np. na temat istotności współczynników, czy siły efektu modelu $R^2$. Na szczęście jest to bardzo proste. Wszystkie tego typu informacje pozwala uzyskać funkcja `summary`.
+
+```{r lm_univariate_sumamry}
+### Podsumowanie modelu
+summary(model1)
+
+### Jak widać pokazuje nam ona szczegółowe podsumowanie modelu
+### wraz z wynikami testów istotności poszczególnych współczynników
+### oraz ogólnym testem F (który jak wiadomo zakłada hipotezę zerową R^2 = 0),
+### czyli inaczej mówiąc analizą wariancji modelu.
+###
+### Mamy również podane R^2 oraz szereg innych statystyk (np. skorygowane R^2)
+### czy błąd standardowy reszt.
+```
+
+```{r lm_univariate_confint}
+confint(model1)
+```
+
+Domyślnie zwraca ona przedziały 95-procentowe, ale to można zmienić za pomocą argumentu `level` (por. `?confint`).
+
+W tym momencie przypomnijmy po krótce interpretację współczynników modelu liniowym. Wartość współczynnika `(Intercept)` to tzw. stała równania, czyli przewidywana wartość zmiennej zależnej w sytuacji, gdy wszystkie zmienne niezależne przyjmują wartość 0. Współczynnik zmiennych niezależnych (tu jest to `Petal.Length`) określają o ile (wedle modelu) wyższy jest przeciętnie poziom zmiennej zależnej obserwacji, u których wartość zmiennej niezależnej jest wyższa o jedną jednostkę. W przypadku regresji wielokrotnej (z więcej niż jedną zmienną zależną) współczynnik ten określa przeciętną różnicę między obserwacjami, które **są takie same** poza tym, że jedna z nich ma wartość danej zmiennej niezależnej wyższą o jedną jednostkę.
+
+To są oczywiście podstawy, które prawie każdy zna, ale warto je przypomnieć, ponieważ dobre, intuicyjne zrozumienie równania regresji okazuje się być niezwykle ważne przy interpretacji bardziej skomplikowanych modeli.
+
+Uzyskanie przedziałów ufności dla współczynników modelu liniowego również jest bardzo proste. Służy do tego funkcja `confint`.
+
+`R` pozwala również na bardzo łatwą (oraz miłą estetycznie) wizualizację modeli liniowych. Wykorzystamy w tym celu niezwykle popularny pakiet graficzny `ggplot2`.
+
+```{r lm_univariate_viz}
+### Wczytanie pakietu i ustawienie szaty kolorystycznej.
+### Domyślna jest niestety dość brzydka (naszym zdaniem).
+library(ggplot2); theme_set(theme_bw())
+
+# Wywołanie funkcji rysującej wykres
+# Specjalnie rozpisaliśmy je na wiele linii, aby móc dokładnie opisać każdy wiersz
+#
+iris %>%    # za pomocą operatora potokowego przekazujemy ramkę danych `iris` do funkcji rysującej
+    ggplot(     # wywołujemy funkcję rysującą
+        aes(    # definujemy tzw. obiekt estetyki; definiuje on logikę wykresu
+            x = Petal.Length,   # w nim określamy zmienną odkładaną na osi X (zmienna niezależna)
+            y = Sepal.Length    # oraz zmienną odkładaną na osi Y (zmienna zależna)
+        )
+    ) +   # operatorem "+" (który ma tu specjalne znaczenie), dodajemy kolejne elementy wykresu
+    geom_point() +    # mówimy żeby wykres narysował dane jako punkty
+    geom_smooth(method = "lm")    # oraz dodał do nich linię trendu prostej regresji liniowej
+
+# W rezultacie otrzymujemy schludny wykres, na którym dodatkowo naniesiony jest graficznie
+# przedział ufności dla oszacowanej linii regresji.
+```
+
+Zbudowanie modelu liniowego dla więcej niż jednej zmiennej jest równie proste. Chwilowo uznamy model z kilkoma ilościowymi zmiennymi niezależnymi za dość trywialny (zasadnicza interpretacja współczynników pozostaje podobna jak w modelu z jedną zmienną, choć nie identyczna) i skupimy się na modelu z dodaną zmienną jakościową. Zwłaszcza, że jak się za chwilę okaże, zbiór `iris` jest wyjątkowo wdzięcznym materiałem do takiej analizy.
+
+Najpierw jednak pochylmy się przez chwilę nad najprostszym modelem liniowym z jedną zmienną jakościową. W tym celu przeprowadzimy znany wszystkim test $t$-studenta przy użyciu menażerii modeli liniowych, jaką dostarcza nam *R* (choć oczywiście `R` posiada również dedykowaną temu problemowi funkcję `t.test`).
+
+```{r lm_univariate_binary}
+### Wygenerujemy proste dane losowe
+df <- data.frame(
+    y = c(
+        rnorm(100, 100, 15),   # 100 realizacji zmiennej losowej o rozkładzie N(100, 15)
+        rnorm(100, 90, 12)     # 100 realizacji zmiennej losowej o rozkładzie N(90, 12)
+    ),
+    x = rep(c("A", "B"), each = 100)    # zmienna grupująca (100 razy A i potem 100 razy B)
+)
+
+### Model linowy badający różnice między grupami A i B
+modeltt <- lm(y ~ x, data = df)
+summary(modeltt)
+
+### Standardowy test t
+(tt <- t.test(y ~ x, data = df, var.equal = TRUE))
+
+### Jak widać różnica między średnimi grupowymi z testu t
+### a oszacowanym współczynnikiem regresji wynosi 0
+### tj. obie wartości są sobie równe
+all.equal(coef(modeltt)[2], (tt$estimate[2] - tt$estimate[1]), check.attributes = FALSE)
+```
+
+Analizując uważnie wyniki podane przez obie funkcje łatwo również zauważyć, że sama konstrukcja testu $t$ jest w obu przypadkach identyczna. I w jednym i drugim przypadku statystyka testowa $t$ wynosi 5.213 i ma 198 stopni swobody. Poziomy istotności również są takie same. Zatem obie metody są w tym przypadku równoważne. I nie jest to przypadek, test $t$ w swojej podstawowej wersji jest tak naprawdę szczególnym przypadkiem modelu liniowego (choć w praktyce zazwyczaj stosuję się tzw. korektę Welscha na nierówne wariancje w grupach i w takim przypadku już nie mamy takiej idealnej równoważności względem modelu liniowego).
+
+Pokazaliśmy ten trywialny przykład głównie dlatego, żeby mieć pretekst do pojawiającego się w takim kontekście równania regresji. Jest ono postaci:
+
+$$y_i = b_0 + b_1x_i + e_i$$
+
+Czyli jest dokładnie takie jakie być powinno. Niemniej jednak zmienna niezależna ma tu szczególną postać, bo jest zmienną zerojedynkową, która wskazuje przynależność do pewnej grupy. W ten sposób jej współczynnik regresji staje się po prostu miarę różnicy między średnią w tej grupie a średnią w grupie odniesienia (czyli w tym przypadku drugiej grupie, w której to zmienna zależna $x$ przyjmuje wartość zero).
+
+To są oczywiście podstawy, które każdy zna. Przypomnieliśmy je jednak w ramach rozgrzewki, bo myślenie w kategoriach równania regresji będzie później bardzo ważne przy interpretacji bardziej skomplikowanych modeli.
+
+Teraz przechodzimy do odrobinę bardziej skomplikowanego przypadku, czyli przypadku interakcji między zmienną ilościową i jakościową. Czyli teraz wracamy do zbioru z powrotem do zbioru `iris`.
+
+Poniżej estymujemy i podsumowujemy model przewidujący długość płatka (`Sepal.Length`) na podstawie długości kielicha (`Petal.Length`) w interakcji z gatunkiem (`Species`).
+
+```{r lm_bivariate_quantqual}
+model2 <- lm(Sepal.Length ~ Petal.Length * Species, data = iris)
+summary(model2)
+```
+
+Jaką interpretacje mają otrzymane tu współczynniki? Regresory zerojedynkowe (`dummy variables/regressors`) dla zmiennej `Species` wskazują gatunki `versicolor` albo `virginica`, co oznacza, że w naszym modelu grupą odniesienia jest gatunek `setosa`. Zatem stała modelu to przewidywany poziom zmiennej zależnej dla gatunku `setosa` przy zerowym `Petal.Length`. Jednocześnie współczynnik dla regresora `Petal.Length` to tak naprawdę współczynnik kierunkowy **jedynie** dla gatunku `setosa`. W przypadku pozostałych gatunków należy dodatkowo uwzględnić regresory modelujące interakcję między danym gatunkiem a zmienną `Petal.Length`. W ten sposób model przyzwala na współistnienie różnych współczynników kierunkowych w różnych grupach.
+
+Zatem ostatecznie z modelu wyłaniają sie trzy równania regresji, po jednym dla każdego z gatunków:
+
+* **setosa:** $y_i = 4.21 + 0.54 \times Petal.Length$
+* **versicolor:** $y_i = (4.21 - 1.81) + (0.54 + 0.29) \times Petal.Length$
+* **virginica:** $y_i = (4.21 - 3.15) + (0.54 + 0.45) \times Petal.Length$
+
+Poniżej przedstawiamy wizualizację otrzymanego modelu.
+
+```{r lm_bivariate_quantqual_viz}
+### Ponownie użyjemy pakietu ggplot2.
+### Jak zaraz zobaczymy, wystarczy dodać jeden argument,
+### aby uzyskać łądny wykres, w którym grupujemy dane wedle gatunków.
+iris %>%    # za pomocą operatora potokowego przekazujemy ramkę danych `iris` do funkcji rysującej
+    ggplot(     # wywołujemy funkcję rysującą
+        aes(    # definujemy tzw. obiekt estetyki; definiuje on logikę wykresu
+            x = Petal.Length,   # w nim określamy zmienną odkładaną na osi X (zmienna niezależna)
+            y = Sepal.Length,   # oraz zmienną odkładaną na osi Y (zmienna zależna)
+            #### NOWA LINIA ###
+            color = Species     # grupujemy wedle zmiennej `Species` i oznaczamy grupy różnymi kolorami
+            ###################
+        )
+    ) +   # operatorem "+" (który ma tu specjalne znaczenie), dodajemy kolejne elementy wykresu
+    geom_point() +    # mówimy żeby wykres narysował dane jako punkty
+    geom_smooth(method = "lm")    # oraz dodał do nich linię trendu prostej regresji liniowej
+```
+
+<hr>
+
+<!-- CSS styling -->
+<style>
+    html {
+        height: 100%;
+        font-size: 62.5%;
+    }
+    body {
+        height: 100%;
+        font-size: 1.6em;
+        font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", sans-serif;
+    }
+    h1, h2, h3 {
+        text-align: center;
+    }
+    h4.author, h4.date {
+        margin: 0.75em 0 0 0;
+        text-align: center;
+    }
+    h2, h3, h4, h5, h6 {
+        margin: 2em 0 1em 0;
+    }
+    div#header {
+        margin: 1em 0 1em 0;
+    }
+    hr {
+        margin: 2em 0 2em 0;
+    }
+    pre {
+        margin-bottom: 2em;
+    }
+</style>
+
+<!-- End of styling -->
