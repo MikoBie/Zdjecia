@@ -1,0 +1,264 @@
+---
+title: "R Notebook"
+author: "Szymon Talaga, Mikołaj Biesaga, ISS UW"
+date: "`r Sys.Date()`"
+output: html_notebook
+---
+
+<hr>
+
+ * Przetwarzanie potokowe (`magrittr`)  [Mikołaj]
+ * Indeksowanie liczbowe i logiczne (`slice` i `filter`)    [Szymon]
+ * Wybieranie kolumn (`select`) [Mikołaj]
+ * Statystyki grupowe (`group_by` i `summarize`)    [Mikołaj]
+ * Rekodowanie zmiennych (`case_when` + może coś jeszcze)   [Szymon]
+ * Tworzenie nowych zmiennych (`mutate`)    [Mikołaj]
+ * Joiny (`left_join` + koledzy)    [Szymon]
+ 
+```{r wczytanie_pakietu_dplyr}
+library(dplyr)  # pakiet należy wcześniej zainstalować 
+library(magrittr) # pakiet do przetwarzania potokowego
+```
+
+## Praca domowa
+
+Tematem pracy domowej ponownie są operacje na ramkach danych. Jednak tym razem będziemy wykorzystywać w tym celu funkcje z pakietu *dplyr*. Tak jak zwykle będziemy wykorzystywać tu zbiór danych `iris`. Przy wykonywaniu ćwiczeń zachęcamy do stosowania notacji przetwarzania potokowego (operator `%>%`).
+
+Ponownie przypominamy o korzystaniu z dokumentacji.
+
+## Zad 1.
+
+Za pomocą przetwarzania potokowego zapisz poniższe przekształcenia (nie mają one większego sensu, ale warto poćwiczyć):
+ 
+ 1. `mean(iris[,2])`
+ 2. `iris[,3]+iris[,"Sepal.Length"]`
+ 3. `table(iris$Species)`
+ 4. `mean(c(mean(iris$Sepal.Width),mean(iris[,1])))`
+ 5. `(mean(iris[,"Sepal.Length"])-iris$Sepal.Length)/sd(iris[,1])`
+ 
+*Podpowiedź:* W tych zadaniach chodzi o wykorzystanie `%>%` i `%$%`
+ 
+```{r Zad1_odpowiedź}
+# Wpisz tutaj swój kod. Nie ma sprawdzenia bo można sobie samemu sprawdzić wklejając kod z poleceń.
+
+mean(iris[,2])==iris %$%
+  mean(Sepal.Width)
+
+iris[,3]+iris[,"Sepal.Length"]==iris %$%
+{Petal.Length+Sepal.Length}
+
+table(iris$Species)==iris %$%
+  table(Species)
+
+mean(c(mean(iris$Sepal.Width),mean(iris[,1])))==iris %$%
+{c(mean(Sepal.Width),mean(Sepal.Length))} %>%
+  mean
+  
+(mean(iris[,"Sepal.Length"])-iris$Sepal.Length)/sd(iris[,1])==iris %$%
+{(mean(Sepal.Length)-Sepal.Length)/sd(Sepal.Length)}
+
+```
+
+## Zad 2.
+
+W tym zadaniu przyjrzymy się indeksowaniu ramek danych za pomocą indeksów liczbowych i logicznych. W ćwiczeniu należy wykorzystać funkcje `slice` i `filter`. Funkcja `filter` nie była omówiona na warsztatach (nasze niedopatrzenie, za co przepraszamy!), dlatego wykonanie ćwiczenia należy rozpocząć od zapoznania się z dokumentacją funkcji `filter` (`?filter`). W szczególności polecamy zapoznać się z podanymi w dokumentacji przykładami.
+
+Przypominamy, że indeksowania liczbowego służy funkcja `slice` a do indeksowania logicznego funckja `filter`.
+
+ 1. Wyświetl pierwsze 12 wierszy zbioru danych `iris`.
+ 2. Wyświetl 1, 3, 5, 7, 9 itd. obserwacje. *Podpowiedź:* warto zapoznać się z funkcją `seq`.
+ 3. Wybierz obserwacje, dla których zmienna `Species` przyjmuje wartości `setosa`.
+ 4. Wybierz obserwacje, dla których zmienna `Species` przyjmuje wartości `setosa` albo `versicolor`.
+ 5. Wybierz obserwacje gatunku`virginica` o wartościach `Petal.Length` większych od 4 (są dwa równoważne sposoby wywołania funkcji `filter` w tym przypadku, jakie?).
+ 
+```{r Zad2_odpowiedź}
+# Tu wpisujemy odpowiedzi
+odp1 <- iris %>%
+  slice(1:12)
+odp2 <- iris %>%
+  slice(seq(from = 1, to = 150, by = 2))
+odp3 <- iris %>%
+  filter(Species=="setosa")
+odp4 <- iris %>%
+  filter(Species=="setosa" | Species=="versicolor")
+odp5 <- iris %>%
+  filter(Species=="virginica" & Petal.Length>5)
+  
+iris %>%
+  filter_all(all_vars(Species=="virginica" & Petal.Length>5))
+
+# Sprawdzenie odpowiedzi
+all.equal(odp1, iris[1:12, ], check.attributes = FALSE)
+# zadania 2 tu nie sprawdzimy, żeby nie podpowiadać.
+all.equal(odp3, iris[iris$Species == "setosa", ])
+# zadań 4 i 5 też tu nie sprawdzmy, żeby nie podpowiadać.
+```
+
+## Zad 3.
+
+Przygodę z tymi zadaniami proponujemy rozpocząć od wpisania w konsole `?select()` i zapoznania się z dokumentacją tej funkcji. Zwłaszcza z częścią "Useful functions"
+
+1. Używając przetwarzania potokowego zsumuj wszystkie wartości zmiennych zaczynających się od "Petal"
+2. Używając przetwarzania potokowego policz średnią dla `Sepal.Length` i `Petal.Length`
+3. Używając przetwarzania potokowego policz sumy we wszystkich kolumnach, które zawierają "." w nazwie
+4. Zmień nazwę `Species` na `Gatunki`, natomiast resztę pozostaw niezmienioną
+
+*Podpowiedź:* W funkcji rename tak samo jak przy lookup table najpierw należy napisać nową nazwę potem starą.    
+
+
+```{r Zad3_odpowiedź}
+# Tutaj wpisz odpowiedzi
+
+odp1 <- iris %>%
+  select(starts_with("Petal")) %>%
+  sum
+
+odp2 <- iris %>%
+  select(ends_with("Length")) %>%
+  colMeans()
+
+odp3 <- iris %>%
+  select(contains(".")) %>%
+  colSums()
+  
+odp4 <- iris %>%
+  rename(Gatunki=Species)
+
+# Sprawdzenie
+
+odp1==sum(iris$Petal.Length+iris$Petal.Width)
+odp2==c(Sepal.Length=mean(iris$Sepal.Length),Sepal.Length=mean(iris$Petal.Length))
+odp3==colSums(iris[,c(1:4)])
+colnames(odp4)==c("Sepal.Length","Sepal.Width","Petal.Length","Petal.Width","Gatunki")
+
+```
+
+
+## Zad 4.
+
+W tym zadaniu głównie skupimy się na funkcjach `group_by` oraz `summarise`.
+
+Stwórz ramkę danych `madra_ramka` składającą się z trzech wierszy i trzech kolumn. W pierwszej kolumnie `Species` gatunki mają być zapisane jako faktory. W drugiej kolumnie `Sepal.Width.mean` - średnie dla gatunków, a w trzeciej `Sepal.Width.sd` - odchylenia standardowe dla gatunków.
+
+
+```{r Zad4_odpowiedź}
+#Ogólnie chodzi o to, żeby otrzymać taką ramkę za pomocą przetwarzania potkowego
+glupia_ramka <- data.frame(Species=factor(c("setosa","versicolor","virginica")),Sepal.Width.mean=aggregate(iris$Sepal.Width,by=list(iris$Species),mean)$x,Sepal.Width.sd=aggregate(iris$Sepal.Width,by=list(iris$Species),sd)$x)
+
+# Wpisz tu rozwiązanie
+madra_ramka <- iris %>%
+  group_by(Species) %>%
+  summarise(Sepal.Width.mean=mean(Sepal.Width),
+            Sepal.Width.sd=sd(Sepal.Width))
+
+
+
+all.equal(glupia_ramka,madra_ramka,check.attributes = FALSE)
+```
+
+## Zad 5.
+
+To zadanie poświęcone jest rekodowaniu zmiennych. Wykorzystamy w nim poznaną na zajęciach funkcję `case_when` oraz przedstawimy nową funkcję `recode` (obie są częścią pakietu *dplyr*).
+
+ 1. Użyj funkcji `case_when` do stworzenia zmiennej będącej dyskretyzajcją zmiennej `Sepal.Width` ze zbioru `iris`. Należy przyjąć podział na dwie grupy: wartości mniejsze od mediany nazwać należy `"low"` a pozostałe `"high"`. Do obliczenia mediany można wykorzystać poznaną na warsztatach funkcję `quantile` lub bardziej wyspecjalizowaną funkcję `median`.
+ 2. Zamień nazwy gatunków w zmiennej `Species` w dowolny sposób. Zadanie to można wykonać zarówno przy użyciu funkcji `case_when` jak i funkcji `recode`. W ramach samokształcenia polecamy wykorzystać funkcję `recode`, bo nie była ona omówiona na zajęciach (oczywiście najpierw poleca się zajrzeć do dokumentacji!)
+ 3. Zrekoduj zmienną `Species` tak, aby gatunek `setosa` pozostał niezmieniony a gatunki `virginica` i `versicolor` zostały połączone w jeden gatunek nazwany `mutant`. Ponownie można tu wykorzystać zarówno `case_when` jak i `recode`. Polecamy spróbować rozwiązać to zadanie na dwa sposoby (zerknięcie do dokumentacji może być jak zwykle bardzo pomocne!).
+ 
+```{r Zad5_odpowiedź}
+# Tu wpisujemy odpowiedzi
+odp1 <- iris %$%
+  case_when(Sepal.Width<median(Sepal.Width) ~ "low",
+            Sepal.Width>=median(Sepal.Width) ~ "high")
+  
+odp2 <- iris %$%
+  recode(Species, setosa="kwiatek 1",
+         versicolor="kwiatek 2",
+         virginica="kwiatek 3")
+
+odp3 <- iris %$%
+  case_when(Species!="setosa" ~ "mutant",
+            Species=="setosa" ~ "setosa")
+
+iris %$%
+  recode(Species,versicolor="mutant",
+         virginica="mutant")
+
+# Sprawdzenie odpowiedzi
+identical(odp1, ifelse(iris$Sepal.Width < median(iris$Sepal.Width), "low", "high"))
+# zadania 2 i 3 nie sprawdzamy, żeby nie dawać podpowiedzi
+```
+
+## Zad 6.
+
+Tak jak zawsze warto zacząć od przeczytania dokumentacji funckji `mutate()`
+
+1. Do `iris` dodaj nową zmienną "Gatunki", w której nazwy ze zmiennej `Species` zostaną zamienione na następujące:
+      setosa <= kwiatek 1
+      versicolor <= kwiatek 2
+      virginica <= kwiatek 3
+2. Policz średnią i odchylenie Petal.Length dla wszystkich kwiatków. Oczywiście chodzi o to, żeby stworzyć taką ramkę danych jak w Zad 4. (tą mądrą).
+
+*Podpowiedź:* Warto tutaj wykorzystać lookup table.
+      
+```{r}
+# Przypomnienie Lookup table. Zamiana pierwszych trzech liter polskich na greckie.
+
+wektor <- sample(LETTERS[1:3],1000,replace = T)
+lookup_vecotr <- c(A="Alfa",B="Beta",C="Gamma")
+grecki_wektor <- lookup_vecotr[wektor]
+grecki_wektor <- unname(grecki_wektor)
+
+# Tutaj trzeba wpisać kod
+
+# Z Lookup table sposób
+
+iris %>%
+  mutate(Gatunki=c(setosa="kwiatek 1",
+                   versicolor="kwiatek 2",
+                   virginica="kwiatek 3")[Species]) %>%
+  group_by(Gatunki) %>%
+  summarise(Mean=mean(Petal.Length),
+            SD=sd(Petal.Length))
+
+
+# Zamiast look up table można też użyć recode lub case_when
+
+iris %>%
+  mutate(Gatunki=recode(Species,setosa="kwiatek 1",
+                        versicolor="kwiatek 2",
+                        virginica="kwiatek 3")) %>%
+  group_by(Gatunki) %>%
+  summarise(Mean=mean(Petal.Length),
+            SD=sd(Petal.Length))
+
+
+iris %>%
+  mutate(Gatunki=case_when(Species=="setosa"~"kwiatek 1",
+                        Species=="versicolor"~"kwiatek 2",
+                        Species=="virginica"~"kwiatek 3")) %>%
+  group_by(Gatunki) %>%
+  summarise(Mean=mean(Petal.Length),
+            SD=sd(Petal.Length))
+
+```
+## Zad 7.
+
+W tym zadaniu przyjrzymy się złączeniom (*joins*). Wykorzystamy tu sztucznie stworzone dane przedstawiające wyniki pewnego prostego eksperymentu.
+
+```{r Zad7_dane}
+### Ramka danych `Respondenci` zawiera w sobie dane osobowe trzech wymyślonych osób badanych.
+Respondenci <- data.frame(
+    id = c(1, 2, 3),  # identyfikator osoby badanej
+    imię = c("Jan", "Anna", "Maria"),
+    nazwisko = c("Kowalski", "Boleyn", "Mazur")
+)
+# Ramka danych zawiera dane dotyczące czasu i jakości wykonania pewnego zadania (respondenci mogli próbować więcej niż raz)
+Wyniki <- data.frame(
+    id = c(1, 1, 2, 2, 2, 2, 3, 3, 4, 4, 4),
+    czas = c(10, 12, 20, 18, 25, 10, 8, 7, 9, 9, 14),
+    wykonanie = c(5, 5, 4, 3, 5, 5, 4, 5, 3, 4, 5)
+)
+
+```
+
+Nie zadajemy tu konkretnych zadań. Zamiast tego polecamy sie zapoznać z (bardzo przystępną) dokumentacją metod z rodziny `join` (`?join`) i potestować różne możliwości. W szczególności polecamy sprawdzić jak działają metody: `left_join`, `inner_join` i `anti_join`. Warto również przetestować, jakie konsekwencje ma zamienianie ramek danych (czyli argumentów `x` i `y`) miejscami.

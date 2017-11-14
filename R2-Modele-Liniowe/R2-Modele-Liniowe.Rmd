@@ -15,14 +15,14 @@ output:
 suppressPackageStartupMessages({
     library(magrittr)
     library(dplyr)
-    library(feather)
+    library(feather) #trzeba najpierw ten pakiet zainstalować
     library(car)
 })
 ```
 
 ## Wprowadzenie
 
-Ogólny model liniowe jest prawdopodobnie najważniejszym modelem zależności między zmiennymi w całej stosowanej statystyce. Jego proste uogólnienia pozwalają na analizę bardzo wielu różnych scenariuszy i układów zmiennych (w tym również zmiennych porządkowych i jakościowych). Jest on również podstawą, na której zbudowana jest znaczna część najważniejszych metod nieliniowych. Dlatego poświęcimy mu tu dość dużo miejsca.
+Ogólny model liniowy jest prawdopodobnie najważniejszym modelem zależności między zmiennymi w całej stosowanej statystyce. Jego proste uogólnienia pozwalają na analizę bardzo wielu różnych scenariuszy i układów zmiennych (w tym również zmiennych porządkowych i jakościowych). Jest on również podstawą, na której zbudowana jest znaczna część najważniejszych metod nieliniowych. Dlatego poświęcimy mu tu dość dużo miejsca.
 
 ### Podstawy modeli liniowych w `R`
 
@@ -37,7 +37,7 @@ gdzie:
  * $b_1$ to współczynnik kierunkowy zmiennej niezależnej
  * $e_i$ to reszta równania regresji dla $i$-tej obserwacji
 
-Powyższe to zatem po prostu równanie funkcji liniowej w jednej zmiennej z dodanym błędem określającym odchylenie linii regresji od rzeczywistej wartości zmiennej zależnej.
+Powyższe to zatem po prostu równanie funkcji liniowej jednej zmiennej z dodanym błędem określającym odchylenie linii regresji od rzeczywistej wartości zmiennej zależnej.
 
 Model jednozmiennowy w naturalny sposób uogólnia się do modelu wielozmiennowego, czyli:
 
@@ -67,7 +67,7 @@ model1 <- lm(Sepal.Length ~ Petal.Length, data = iris)
 ###    (zauważmy, że przekazujemy te nazwy jako nazwy obiektów, więc R musi wiedzieć,
 ###     gdzie szukać przypisanych im wartości).
 
-### Teraz zobaczmy, co mówi na taki model liniowy, jak każemy wypisać go w konsoli
+### Teraz zobaczmy, co mówi nam taki model liniowy, jak każemy wypisać go w konsoli
 model1
 ```
 
@@ -92,7 +92,7 @@ confint(model1)
 
 Domyślnie zwraca ona przedziały 95-procentowe, ale to można zmienić za pomocą argumentu `level` (por. `?confint`).
 
-W tym momencie przypomnijmy po krótce interpretację współczynników modelu liniowym. Wartość współczynnika `(Intercept)` to tzw. stała równania, czyli przewidywana wartość zmiennej zależnej w sytuacji, gdy wszystkie zmienne niezależne przyjmują wartość 0. Współczynnik zmiennych niezależnych (tu jest to `Petal.Length`) określają o ile (wedle modelu) wyższy jest przeciętnie poziom zmiennej zależnej obserwacji, u których wartość zmiennej niezależnej jest wyższa o jedną jednostkę. W przypadku regresji wielokrotnej (z więcej niż jedną zmienną zależną) współczynnik ten określa przeciętną różnicę między obserwacjami, które **są takie same** poza tym, że jedna z nich ma wartość danej zmiennej niezależnej wyższą o jedną jednostkę.
+W tym momencie przypomnijmy po krótce interpretację współczynników w modelu liniowym. Wartość współczynnika `(Intercept)` to tzw. stała równania, czyli przewidywana wartość zmiennej zależnej w sytuacji, gdy wszystkie zmienne niezależne przyjmują wartość 0. Współczynnik zmiennych niezależnych (tu jest to `Petal.Length`) określają o ile (wedle modelu) wyższy jest przeciętnie poziom zmiennej zależnej obserwacji, u których wartość zmiennej niezależnej jest wyższa o jedną jednostkę. W przypadku regresji wielokrotnej (z więcej niż jedną zmienną zależną) współczynnik ten określa przeciętną różnicę między obserwacjami, które **są takie same** poza tym, że jedna z nich ma wartość danej zmiennej niezależnej wyższą o jedną jednostkę.
 
 To są oczywiście podstawy, które prawie każdy zna, ale warto je przypomnieć, ponieważ dobre, intuicyjne zrozumienie równania regresji okazuje się być niezwykle ważne przy interpretacji bardziej skomplikowanych modeli.
 
@@ -153,7 +153,7 @@ Pokazaliśmy ten trywialny przykład głównie dlatego, żeby mieć pretekst do 
 
 $$y_i = b_0 + b_1x_i + e_i$$
 
-Czyli jest dokładnie takie jakie być powinno. Niemniej jednak zmienna niezależna ma tu szczególną postać, bo jest zmienną zerojedynkową, która wskazuje przynależność do pewnej grupy. W ten sposób jej współczynnik regresji staje się po prostu miarę różnicy między średnią w tej grupie a średnią w grupie odniesienia (czyli w tym przypadku drugiej grupie, w której to zmienna zależna $x$ przyjmuje wartość zero).
+Czyli jest dokładnie takie jakie być powinno. Niemniej jednak zmienna niezależna ma tu szczególną postać, bo jest zmienną zerojedynkową, która wskazuje przynależność do pewnej grupy. W ten sposób jej współczynnik regresji staje się po prostu miarą różnicy między średnią w tej grupie a średnią w grupie odniesienia (czyli w tym przypadku drugiej grupie, w której to zmienna zależna $x$ przyjmuje wartość zero).
 
 To są oczywiście podstawy, które każdy zna. Przypomnieliśmy je jednak w ramach rozgrzewki, bo myślenie w kategoriach równania regresji będzie później bardzo ważne przy interpretacji bardziej skomplikowanych modeli.
 
@@ -194,7 +194,7 @@ iris %>%    # za pomocą operatora potokowego przekazujemy ramkę danych `iris` 
     geom_smooth(method = "lm")    # oraz dodał do nich linię trendu prostej regresji liniowej
 ```
 
-Na zakończenie tej sekcji pochylimy się nad najważniejszych i jednocześnie najbardziej klasycznych modeli liniowych czyli 2-czynnikowej analizie wariancji. Wykorzystamy do tego pewien rzeczywisty ale całkowicie zaciemniony zbiór danych, który wczytamy z pliku binarnego. W zbiorze tym będziemy mieli dwa 2-poziomowe czynniki jakościowe oraz ilościową zmienną zależną. Dodatkowo liczebnościo poszczególnych grup nie będą w pełni zrównoważone, co pozwoli na zobraozwanie najważniejszych różnic między różnymi typami sum kwadratów, które są bardzo ważne w analizie wariancji.
+Na zakończenie tej sekcji pochylimy się nad najważniejszym i jednocześnie najbardziej klasycznym rodzajem modeli liniowych czyli 2-czynnikowej analizie wariancji. Wykorzystamy do tego pewien rzeczywisty ale całkowicie zaciemniony zbiór danych, który wczytamy z pliku binarnego. W zbiorze tym będziemy mieli dwa 2-poziomowe czynniki jakościowe oraz ilościową zmienną zależną. Dodatkowo liczebności poszczególnych grup nie będą w pełni zrównoważone, co pozwoli na zobraozwanie najważniejszych różnic między różnymi typami sum kwadratów, które są bardzo ważne w analizie wariancji.
 
 ```{r twoway_load_data}
 df <- read_feather("twoway.feather")
@@ -213,11 +213,11 @@ anova(twmod1)
 anova(twmod2)
 ```
 
-Zauważmy, że choć w oby przypadkach otrzymaliśmy podobne wyniki, to jednak nie są one identyczne. Różnią się zarówno na poziomie wartości sum kwadratów jak i samych statystyk testowych i co za tym idzie obliczonych poziomów istotności efektów. Czemu tak jest? Otóż jest tak dlatego, że `R` w funkcji `anova` używa **tylko i wyłącznie** tzw. sum kwadratów typu I czyli inaczej sekwencyjnych sum kwadratów. Dla użytkowników pakietów takich jak *SPSS* może to być zaskakujące, gdyż tam domyślnie wykorzystuje się sumy typu III, które działają inaczej. Jednak twórcy `R` mieli bardzo dobry powód, żeby uwzględniać tylko sumy typu pierwszego: pozostałe typu sum kwadratów (II i III i inne) tak naprawdę **nie istnieją**. Mówimy to tu w tym sensie, że inne typy sym kwadratów są tak naprawdę tylko szczególnymi przypadkami sum typu I i zawsze można zdefiniować taki model liniowy, w którym sumy kwadratów typu I będą równe pewnej sumie kwadratów innego typu.
+Zauważmy, że choć w obu przypadkach otrzymaliśmy podobne wyniki, to jednak nie są one identyczne. Różnią się zarówno na poziomie wartości sum kwadratów jak i samych statystyk testowych i co za tym idzie obliczonych poziomów istotności efektów. Czemu tak jest? Otóż jest tak dlatego, że `R` w funkcji `anova` używa **tylko i wyłącznie** tzw. sum kwadratów typu I czyli inaczej sekwencyjnych sum kwadratów. Dla użytkowników pakietów takich jak *SPSS* może to być zaskakujące, gdyż tam domyślnie wykorzystuje się sumy typu III, które działają inaczej. Jednak twórcy `R` mieli bardzo dobry powód, żeby uwzględniać tylko sumy typu pierwszego: pozostałe typu sum kwadratów (II i III i inne) tak naprawdę **nie istnieją**. Mówimy to tu w tym sensie, że inne typy sum kwadratów są tak naprawdę tylko szczególnymi przypadkami sum typu I i zawsze można zdefiniować taki model liniowy, w którym sumy kwadratów typu I będą równe pewnej sumie kwadratów innego typu.
 
-W jaki dokładnie sposób działa suma kwadratów typu I? Analiza wariancji w tym modelu polega na testowaniu czynników dodawanych pojedynczo w kolejności w jakiej zostały uwzględione w modelu. Zatem w modelu ze specyfikacją `X ~ A*B` najpierw testowany jest efekt `A|1` (sprawdza, czy średnie grupowe są czynnika A są różne od siebie; w tym przypadku jest to w przybliżeniu ekwiwalent testu $t$), następnie efekt `B|A` (istotność czynnika B po uwzględnieniu efektu `A`) i na koniec istotność czynnika interakcji `A:B|A, B`. Właśnie dlatego kolejność czynników w równaniu modelu ma tu znaczenie.
+W jaki dokładnie sposób działa suma kwadratów typu I? Analiza wariancji w tym modelu polega na testowaniu czynników dodawanych pojedynczo w kolejności w jakiej zostały uwzględione w modelu. Zatem w modelu ze specyfikacją `X ~ A*B` najpierw testowany jest efekt `A|1` (sprawdza, czy średnie grupowe dla czynnika A są różne od siebie; w tym przypadku jest to w przybliżeniu ekwiwalent testu $t$), następnie efekt `B|A` (istotność czynnika B po uwzględnieniu efektu `A`) i na koniec istotność czynnika interakcji `A:B|A, B`. Właśnie dlatego kolejność czynników w równaniu modelu ma tu znaczenie.
 
-Sumy II i III typu są bezużyteczne. Tak naprawdę są bardzo użyteczne, gdyż oszczędzają mnóstwo roboty, którą trzeba by spędzić na definiowaniu dodatkowych modeli testujących interesujące nas hipotezy, i w praktyce używa się ich bardzo często. Dlatego społeczność zorganizowana wokół `R` szybko przygotowała implementacje analizy wariancji z pozostałymi najważniejszymi typami sum kwadratów czyli typem II i III. Można je znaleźć w funkcji `Anova` z popularnego pakietu `car`.
+Sumy II i III typu są pozornie bezużyteczne. Tak naprawdę są bardzo użyteczne, gdyż oszczędzają mnóstwo roboty, którą trzeba by spędzić na definiowaniu dodatkowych modeli testujących interesujące nas hipotezy, i w praktyce używa się ich bardzo często. Dlatego społeczność zorganizowana wokół `R` szybko przygotowała implementacje analizy wariancji z pozostałymi najważniejszymi typami sum kwadratów czyli typem II i III. Można je znaleźć w funkcji `Anova` z popularnego pakietu `car`.
 
 ```{r twoway_unbalanced_model_anova}
 # Anova z sumami typu II
@@ -229,7 +229,7 @@ Anova(twmod1, type = 3)
 
 Czemu wyniki w obu przypadkach są trochę inne? Ponieważ obie sumy kwadratów zorientowane są na testowanie trochę innych efektów, i jak się zaraz okaże typ III jest w większości przypadków **pozbawiony sensu**, pomimo że jest to najczęściej stosowany typ sum kwadratów (ale jest to błąd!!!).
 
-Sumy kwadratów typu II stosoują się tzw. zasady brzegowości (*principle of marginality*), czyli nie testują nigdy bezsensownych hipotez, w których z wariancji efektów nadrzędnych wyłącza się wariancję wyjaśnianą przez efekty w nich zagnieżdżone. Bardziej konkretnie, w naszy przypadku Anova z sumami typu II testuje następujące efekty:
+Sumy kwadratów typu II stosoują się tzw. zasady brzegowości (*principle of marginality*), czyli nie testują nigdy bezsensownych hipotez, w których z wariancji efektów nadrzędnych wyłącza się wariancję wyjaśnianą przez efekty w nich zagnieżdżone. Bardziej konkretnie, w naszym przypadku Anova z sumami typu II testuje następujące efekty:
 
  * `A | B` (efekt `A` z wyłączeniem wariancji wyjaśnianej przez `B`)
  * `B | A` (efekt `B` z wyłączeniem wariancji wyjaśnienej przez `A`)
@@ -241,11 +241,11 @@ Siłą sum kwadratów typu II jest właśnie to, że każda z powyższych hipote
  * `B | A, A:B` (efekt `B` z wyłączeniem wariancji wyjaśnianej przez `A` oraz interakcję `A` i `B`)
  * `A:B | A, B` (efekt interakcji `A` i `B` po wyłączeniu wariancji wyjaśnianej przez oba efekty główne)
 
-Jak łatwo zauważyć efek interakcji jest w obu przypadkach testowany w taki sam sposób (co widać również w tabelach analizy wariancji, które otrzymaliśmy). Jednocześnie sposób testowania efektów głównych jest w przypadku sum typu III niezwykle problematyczny, bo testowane są efekty, które w większości przypadków nie mogą mieć żadnej sensownej interpretacji. W rezultacie testy efektów głównych w analizie wariancji z sumami typu 3-ciego mają prawie zawsze mniejszą moc (bo niepotrzebnie wyłączamy wariancje powiązaną z efektem interakcji).
+Jak łatwo zauważyć efekt interakcji jest w obu przypadkach testowany w taki sam sposób (co widać również w tabelach analizy wariancji, które otrzymaliśmy). Jednocześnie sposób testowania efektów głównych jest w przypadku sum typu III niezwykle problematyczny, bo testowane są efekty, które w większości przypadków nie mogą mieć żadnej sensownej interpretacji. W rezultacie testy efektów głównych w analizie wariancji z sumami typu 3-ciego mają prawie zawsze mniejszą moc (bo niepotrzebnie wyłączamy wariancje powiązaną z efektem interakcji).
 
 #### Modele multiplikatywne
 
-Jakkolwiek standardowy model liniowy jest z definicji addytywny, to może być wykorzystany do modelowania bardzo wielu różnych zjawisk i procesów nieliniowych, w tym niektórych procesów multiplikatywnych. Kanonicznym przykładem takiego zastosowania jest modeli liniowy, w którym zmienną zależną poddano przekształceniu logarytmicznemu.
+Jakkolwiek standardowy model liniowy jest z definicji addytywny, to może być wykorzystany do modelowania bardzo wielu różnych zjawisk i procesów nieliniowych, w tym niektórych procesów multiplikatywnych. Kanonicznym przykładem takiego zastosowania jest model liniowy, w którym zmienną zależną poddano przekształceniu logarytmicznemu.
 
 Załóżmy, że mamy model postaci:
 
@@ -253,11 +253,11 @@ $$log(y) = b_0 + b_1x$$
 Widać, że dopóki pozostawiamy w zmienną zależną w skali logarytmicznej, to nasz model jest liniowy i addytywny. Zobaczmy jednak, co się stanie, gdy przedstawimy model na skali właściwej dla nieprzekształconej zmiennej $y$.
 
  1. Dokonujemy eksponencjacji obu stron powyższego równania: $y = e^{b_0 + b_1x}$
- 2. Co wykorzystując arytmetyke potęgowania można zapisać: $y = e^{b_0}e^{b_1x}$
+ 2. Co wykorzystując arytmetykę potęgowania można zapisać: $y = e^{b_0}e^{b_1x}$
  3. $e^{b_0}$ to stała, więc chwilowo można ją pominąć: $y \propto e^{b_1x}$
  4. Teraz widać, że zwiększając $x$ o 1 mamy: $e^{b_1(x+1)} = e^{b_1}e^{b_1x}$
 
-Zatem w takim modelu każdorazowy wzrost zmiennej niezależnej o jedną jednostkę powoduje wzrost poziomu zmiennje zależnej o czynnik $e^{b_1}$ (innymi słowy wartości sprzed wzrostu zostaje przemnożona przez stałą równą $e^{b_1}$). W ten sposób regresja liniowa (z natury addytywna) może być wykorzystana do modelowania niektórych zjawisk o multiplikatywnym charakterze.
+Zatem w takim modelu każdorazowy wzrost zmiennej niezależnej o jedną jednostkę powoduje wzrost poziomu zmiennej zależnej o czynnik $e^{b_1}$ (innymi słowy wartości sprzed wzrostu zostaje przemnożona przez stałą równą $e^{b_1}$). W ten sposób regresja liniowa (z natury addytywna) może być wykorzystana do modelowania niektórych zjawisk o multiplikatywnym charakterze.
 
 Wykorzystywanie transformacji logarytmicznej jest niezwykle użyteczne. Przede wszystkim pozwala badać niektóre zjawiska o nieaddytwnym charakterze, a także (co jest powiązane) w wielu przypadkach jest dobrym narzędziem stabilizowania niehomogenicznej wariancji reszt.
 
