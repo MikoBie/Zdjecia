@@ -17,6 +17,7 @@ suppressPackageStartupMessages({
     library(dplyr)
     library(feather) #trzeba najpierw ten pakiet zainstalować
     library(car)
+    library(tidyr)
 })
 ```
 
@@ -293,6 +294,114 @@ df %>%
 ```
 
 Powyższe wykresy pokazują jak bardzo dobrze sprawdziła się w tym przypadku transformacja logarytmiczna. Nalezy jednak zawsze pamiętać o tym, że zastosowanie tej transformacji będzie miało **zawsze** daleko idące skutki konsekwencje względem interpretacji modelu, bo zmienia model addytywny w model multiplikatywny. Z tego same powodu transformacja logarytmiczna jest również więcej niż tylko pewną sztuczką służącą do normalizowania rozkładów i stabilizowania wariacji.
+
+#### Przekształcenie logitowe
+
+Drugim użytecznym i ciekawym przekształceniem jest tzw. przekształcenie logitowe. Przyjrzymy mu się uważnie też przy okazji omawiania regresji logistycznej, jednak warto je też omówić w kontekście zwykłej regresji liniowej. Tak naprawdę w wielu przypadkach najważniejszym, a prawie nigdy nieartykułowanym, założeniem regresji liniowej jest to, że zmienna zależna może być modelowana jako *zmienna rzeczywista* ($y \in \mathbb{R}$). Jest to ważne, ponieważ regresja liniowa, jako prosty model addytywny zakłada liniowy wzrost/spadek zmiennej zależnej bez żadnych ograniczeń (tj. tak długo, jak długo zmieniają się wartości zmiennych predyktorów). To pokazuje, że np. modelowanie wartości, które są zliczaniemi, a więc $y \in \mathbb{N}$, w prostym modelu liniowym czasami może nie być dobrym pomysłem (dlatego powstały takie narzędzia jak np. regresja poisssona). Podobnie jest w przypadku modelowania odsetków/prawdopodobieństw. Gdy mamy do czynienia ze zdarzeniami binarnymi (0/1), wówczas należy sięgnąć po regresję logistyczną (którą omówimy za jakiś czas). Jednak w niektórych przypadkach naszą zmienną zależną jest właściwe prawdopodobieństwo, czy też odsetek. W takim przypadku mamy do czynienia po prostu ze zmienną zależną $y \in (0, 1)$. Widać wyraźnie, że nasza zmienna jest zdefiniowana na jedynie maleńkim podzbiorze linii liczb rzeczywistych, więc regresja liniowa może bardzo łatwo dać to bezsesnowne rezultaty. Pierwszym krokiem przed właściwą analizą powinno więc być takie przekształcenie zmiennej zależnej, aby rozkładała się ona po całym zbiorze liczb rzeczywistych. Do tego właśnie służy transformacja logitowa. Ma ona następującą postać:
+
+$$logit(y) = log(\frac{y}{1-y})$$
+
+Gdzie:
+ * $y \in (0, 1)$
+
+Czemu powyższa transformacja działa? Łatwo to dostrzec rozbijając wzór na elementy składowe. Dla uproszczenia będziemy interpretować $y$ jako miarę prawdopodobieństwa (a więc odsetki też się kwalifikują). Zauważmy, że pierwsze przekształcenie to po prostu $\frac{y}{1-y}$. Jest to wzór na tzw. szanse (*odds*), czyli stosunek prawdopodobieństwa sukcesu do prawdopodobieństwa porażki. Nasze $y$ wedle przyjętego założenia nigdy jest dodatnie, więc mamy $\frac{y}{1-y} \in (0, \infty)$. Następnie mamy $\log(\frac{y}{1-y}) \in \mathbb{R}$. W ten właśnie sposób otrzymujemy ostatecznie zmienną rzeczywistą, którą możemy swobodnie modelować przy użyciu regresji liniowej.
+
+Wykorzystamy tę okazję, aby wprowadzić bardzo ważny i niezwykle przydatny koncept programistyczny czyli definiowanie funkcji. Funkcja w programowaniu jest analogiem funkcji w matematyce: to magiczne pudełko, które przyjmuje jakieś dane wejściowe i w zamian zwraca jakieś dane wyjściowe. Każda funkcja ma również swoją domenę czyli zbiór wartości argumentów (danych wejściowych), które akceptuje (dla których jest zdefiniowana). Zobaczmy, jak wygląda w R funkcja licząca logit.
+
+```{r logit_func}
+logit <- function(x) {
+    # Ciało funkcji; 
+    # tu definiujemy operacje, które przekształcają dane wejściowe w dane wyjściowe
+    # Sprawdzamy, czy argument wejściowy jest poprawny
+    stopifnot(x >= 0, x <= 1)
+    # Obliczamy wartość logitu i zwracamy ją
+    log(x / (1 - x))
+}
+
+# Następnie wywołujemy naszą funkcję tak jak każdą inną funkcję w R
+logit(.8)
+```
+
+Wykorzystajmy ją teraz do przeprowadzenia prostej analizy.
+
+```{r logit_naive_model}
+# Przygotowanie sztucznych danych
+set.seed(101)
+y <- runif(1000)    # odsetki pobrane z rozkładu jednostajnego
+x <- y + rnorm(1000, sd = 1/2)  # zmienna o rozkładzie normalnym skorelowana z x
+
+# Naiwny model (bez transformacji zmiennej zależnej)
+lmod0 <- lm(y ~ x)
+summary(lmod0)
+
+# Pomocnicza ramka danych do wizualizacji przy użyciu pakietu `ggplot2`
+df <- data.frame(x = x, y = y)
+
+# Wykres rozrzutu dla zmiennych z nałożoną nieparametryczną krzywą najlepszego dopasowania
+df %>%
+    ggplot(aes(x = x, y = y)) +
+    geom_point(alpha = .3) +
+    geom_smooth(method = "loess")
+```
+
+```{r logit_model}
+# Wykres rozrzutu z przkeształconą zmienną zależną
+df %>%
+    ggplot(aes(x = x, y = logit(y))) +
+    geom_point(alpha = .3) +
+    geom_smooth(method = "loess")
+
+# Model z przekształconą zmienną zależną
+lmod1 <- lm(logit(y) ~ x)
+summary(lmod1)
+```
+
+Pierwszy skonstruowany model był postaci:
+
+$$y = 0.36 + 0.26x$$
+Widać, że przy odpowiednio dużym/małym $x$ może on generować bezsensowne wartości $y$ będące poza zbiorem $(0, 1)$. Drugi model daje za to następujące równanie:
+
+$$log(\frac{y}{1-y}) = -0.83 + 1.59x$$
+W tym momencie warto dokonać kilku przekształceń algebraicznych, żeby sprowadzić model z poziomu trudnych w interpretacji logarytmów szans (*log-odds*) do poziomu zrozumiałych dla człowieka prawdopodobieństwa. Najpierw schodzimy do poziomu szans poprzez eksponencjaję równania stronami:
+
+$$\frac{y}{1-y} = e^{-0.83 + 1.59x}$$
+Stąd już łatwo przejść do wyrażenia określającego prawdopodobieństwo:
+
+$$y = \frac{e^{-0.83 + 1.59x}}{1 + e^{-0.83 + 1.59x}}$$
+
+Widzimy więc, że istotnie otrzymaliśmy funkcję określającą $y$, która nie może przyjąć wartości spoza zbioru $(0, 1)$ niezależnie od poziomu zmiennej niezależnej $x$. Otrzymaliśmy w efekcie funkcję nieliniową.
+
+Zobaczmy, jak zachowują się oba modele, gdy wykorzystamy je do predykcji na przedziale $x \in [-2.5, 2.5]$.
+
+```{r logit_naive_model_pred}
+# Zdefiniujmy funkcję odwrotną do funkcji logitowej
+invlogit <- function(x) {
+    exp(x) / (1 + exp(x))
+}
+
+# Tworzymy ramkę danych z siatką wartości predyktorów (tu jednozmiennową)
+df <- data.frame(x = seq(from = -2.5, to = 2.5, by = 0.01))
+# Wykorzystjemu oba modele do dokonania predykcji w oparciu o te dane
+df$y <- predict(lmod0, newdata = df)
+df$logit_y <- invlogit(predict(lmod1, newdata = df))
+
+# Zobaczmy naszą ramkę danych
+head(df)
+# Wykorzystajmy metodą `gather` z pakietu `tidyr`
+# aby z dwóch kolumn stworzyć jedną, co ułatwi jednoczesną wizualizację obu modeli
+df <- gather(df, key = "wskaźnik", value = "y", -x)
+
+# Zobaczmy ramkę danych raz jeszcze
+head(df)
+
+# Zwizualizujmy predykcję obu modeli
+df %>%
+    ggplot(aes(x = x, y = y, col = wskaźnik, linetype = wskaźnik)) +
+    geom_line() +
+    geom_hline(yintercept = c(0, 1), linetype = 2)
+```
+
+Widzimy, że transformacje logitowa grzecznie zachowuje narzucone jej warunki co do zakresu przyjmowanych wartości, czego nie można powiedzieć o prostej regresji liniowej.
 
 <hr>
 
