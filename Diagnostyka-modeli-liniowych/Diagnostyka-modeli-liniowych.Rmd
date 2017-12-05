@@ -1,9 +1,11 @@
 ---
 title: "Diagnostyka modeli liniowych"
+author: "Mikołaj Biesaga, Szymon Talaga, ISS UW"
 output: html_notebook
 ---
 <hr>
 * Homoskedastyczność versus Heteroskedastyczność
+* Normalność
 * Autokorelacja
 * Outliery
 * Kolinearność
@@ -17,7 +19,11 @@ library(dplyr)
 
 ## Wprowadzenie
 
-Tak naprawdę to, że model wyszedł nam istotny nie znaczy nic dopóki nie przyjrzemy się mu bliżej. Tak jak w jakimś stopniu Szymon pokazał zapisanie modelu w postaci równania i zmuszenie R do tego, żeby zwrócił nam bety i intercept jest banalnie proste. Jednak w większości przypadków dopiero wtedy zaczyna się cała zabawa. Żeby móc wyciągać jakiekolwiek wnioski na temat współczynników trzeba wiedzieć co w ogóle się z danymi dzieje. Poniżej pokażemy najważniejsze aspekty diagnostyki modeli liniowych. Nie znaczy to jednak, że zawsze trzeba wszystko robić oraz, że zawsze trzeba postępować zgodnie z tym co jest poniżej napisane. Niestety jest tak, że tak naprawdę każdy zbiór danych jest inny. Dobrym wstępem, takim bardzo prostym do modeli liniowych w R jest artykuł Bodo Wintera, który jest na dropboxie w folderze Sroda_6.
+Moim zdaniem pierwsze pytanie jeśli chodzi o diagnostykę czy też tworzenie modeli liniowych jest takie po co je tworzymy. Innymi słowy czy tak naprawdę chcemy trochę jak Kosiński jak najlepiej przewidywać zachowanie czy testujemy jakąś teorię. Ma to o tyle znaczenie, że w pierwszym przypadku piekła nie ma i można przekształcać zmienne jak tylko się chce, a w drugim trzeba się zastanowić czy ma to sens z punktu widzenia teoretycznego.  
+
+Tak naprawdę to, że model wyszedł nam istotny nie znaczy nic dopóki nie przyjrzemy się mu bliżej. Tak jak w jakimś stopniu Szymon pokazał zapisanie modelu w postaci równania i zmuszenie R do tego, żeby zwrócił nam bety i intercept jest banalnie proste. Jednak w większości przypadków dopiero wtedy zaczyna się cała zabawa. Żeby móc wyciągać jakiekolwiek wnioski na temat współczynników trzeba wiedzieć co w ogóle się z danymi dzieje. Poniżej pokażemy najważniejsze aspekty diagnostyki modeli liniowych. Nie znaczy to jednak, że zawsze trzeba wszystko robić oraz, że zawsze trzeba postępować zgodnie z tym co jest poniżej napisane. Niestety jest tak, że tak naprawdę każdy zbiór danych jest inny. Dobrym wstępem, takim bardzo prostym do modeli liniowych w R jest artykuł Bodo Wintera, który jest na dropboxie w folderze Wtorek_1.  
+
+*WAŻNE:* Większość omawianych modeli ma jakiś sens, ale nie będziemy się za bardzo w nie zagłębiać. Głównie chodzi o pokazanie problemów, jakie mogą się pojawić w diagnostyce modeli liniowych.
 
 ## Homoskedstyczność versus Heteroskedastyczność
 
@@ -38,13 +44,13 @@ model <- lm(prestige ~ education + income + type, data=Prestige)
 summary(model)
 
 # wykresy reszt
-residualPlots(model)
+residualPlots(model)#,quadratic=FALSE,smoother="loess")
 
 # proponuje sprawdzić sobie argumenty tej funkcji
 ?residualPlot
 
 ```
-Funkcja `residualPlots` zwraca nam wyniki testu dopasowania oraz wykresy reszt. Zacznijmy od wykresów reszt. W prawym dolnym rogu mamy najbardziej klasyczny z klasycznych wykresów czyli Residuals versus Fitted values (niech nie zmyli Was to, że jest napisane Pearson residuals, w naszym przypadku są to zwykłe reszty, gdy mamy doczynienia z ważoną regresją to wtedy Pearson residuals są inne niż zwykłe reszty, ale to trochę inna historia). W idealnym świecie czerwona linia powinna pokrywać się z linią przerywaną, jednak jak widać tak niestety nie jest. Oznacza to ni mniej ni więcej, że w naszym modelu brakuje predyktora (nasz model nie jest dobrze dopasowany do danych). Żeby mniej lub bardziej zorientować się co jest nie tak patrzymy na pozostałe wykresy, stosując tę samą zasadę co w przypadku dolnego wykresu *Nie trzeba o tym przesadnie długo myśleć, ale tak naprawdę to co tutaj robimy to sprawdzamy czy reszty można wytłumaczyć jako liniową kombinacje predyktorów. Innymi słowy te wykresy pokazują po prostu wykresy regresji gdzie zmienną wyjaśnianą są reszty czyli np. dla `education` równanie takiej regresji wygląda tak: $e = \beta_0 + \beta_1Poziom.edukacji + e$.* Innymi słowy linia czerwona powinna pokrywać się z przerywaną (w przypadku typu zawodu boxploty powinny być mniej więcej równe). Widać, że coś jest na rzyczy ze zmienną `income`. Możemy spojrzeć teraz na wyniki testu dopasowania *Nie trzeba o tym myśleć: test t sprawdza po prostu na ile współczynnik $\beta_1$ dla regresji, w której zmienną wyjaśnianą jest błąd jest istotny. Innymi słowy na ile reszty są liniową kombinacją predyktorów*. Jeśli wyniki są istotne oznacza to, że mamy problem i wariancja nie jest homoskedastyczna. Dodatkowo istotność testu Tukey'a pokazuje, że model jest źle dopasowany. *W praktyce nie trzeba akurat o tym teście za dużo myśleć bo testuje on na ile dodanie kwadratu fitted valuse do modelu pomoże.* Innymi słowy w tym przypadku pokazuje, że nasz początkowy model jest nieadekwatny i trzeba pomyśleć nad transformacją 'income'.
+Funkcja `residualPlots` zwraca nam wyniki testu dopasowania oraz wykresy reszt. Zacznijmy od wykresów reszt. W prawym dolnym rogu mamy najbardziej klasyczny z klasycznych wykresów czyli Residuals versus Fitted values (niech nie zmyli Was to, że jest napisane Pearson residuals, w naszym przypadku są to zwykłe reszty, gdy mamy doczynienia z ważoną regresją to wtedy Pearson residuals są inne niż zwykłe reszty, ale to trochę inna historia). W idealnym świecie czerwona linia powinna pokrywać się z linią przerywaną, jednak jak widać tak niestety nie jest. Oznacza to ni mniej ni więcej, że w naszym modelu brakuje predyktora (nasz model nie jest dobrze dopasowany do danych). Żeby mniej lub bardziej zorientować się co jest nie tak patrzymy na pozostałe wykresy, stosując tę samą zasadę co w przypadku dolnego wykresu *Nie trzeba o tym przesadnie długo myśleć, ale tak naprawdę to co tutaj robimy to sprawdzamy czy reszty można wytłumaczyć jako liniową kombinacje predyktorów. Innymi słowy te wykresy pokazują po prostu wykresy regresji gdzie zmienną wyjaśnianą są reszty czyli np. dla `education` równanie takiej regresji wygląda tak: $e = \beta_0 + \beta_1Poziom.edukacji + e$.* Innymi słowy linia czerwona powinna pokrywać się z przerywaną (w przypadku typu zawodu boxploty powinny być mniej więcej równe). Widać, że coś jest na rzyczy ze zmienną `income`. Możemy spojrzeć teraz na wyniki testu dopasowania *Nie trzeba o tym myśleć: test t sprawdza po prostu na ile współczynnik $\beta_1$ dla regresji, w której zmienną wyjaśnianą jest błąd jest istotny. Innymi słowy na ile reszty są liniową kombinacją predyktorów*. Jeśli wyniki są istotne oznacza to, że mamy problem i wariancja nie jest homoskedastyczna. Dodatkowo istotność testu Tukey'a pokazuje, że model jest źle dopasowany. *W praktyce nie trzeba akurat o tym teście za dużo myśleć bo testuje on na ile dodanie kwadratu fitted valuse do modelu pomoże.* Innymi słowy w tym przypadku pokazuje, że nasz początkowy model jest nieadekwatny i trzeba pomyśleć nad transformacją `income`.
 
 Innym sposobem zobaczenia gdzie leży problem są `marginalModelPlots()`. Te wykresy pokazują po prostu relacje między zmienną wyjaśnianą i zmiennymi wyjaśniającymi. Stosujemy tak naprawdę bardzo podobną regułe jeśli chodzi o sprawdzenie na ile model jest dopasowany. W idealnym świecie czerwona linia pokrywałaby się idealnie z linią niebieską. Co tak naprawdę się tutaj dzieje. Jedyne na co warto zwrócić uwagę to na realcje `income` z `prestige`, nie jest liniowa.
 
@@ -52,9 +58,9 @@ Innym sposobem zobaczenia gdzie leży problem są `marginalModelPlots()`. Te wyk
 marginalModelPlots(model)
 ```
 
-Zdaignozowanie heteroskedastyczności nie należy do przesadnie trudnych i poza opisanymi powyżej metodami jest milard innych (np. Breush-Pagan Test, White's General Test, Park Test), jednak naszym zdaniem dobrze jest przede wszystkim przyjrzeć się wykresom, żeby wiedzieć co się dzieje w danych. Problem pojawia się wtedy gdy ta heteroskedastyczność się pojawia. Najłatwiejszym rozwiązaniem jest dodanie nowego predyktora, myślę, że w większości przypadków rozwiązuje to problem. Nowy predyktor rozumiany jest tutaj zarówno jako nowa zmienna jak i przekształcona zmienna już w modelu istniejąca - oczywiście w taki sposób, żeby miało to sens teoretyczny. Jeśli żadno z powyższych rozwiązań nie skutkuje to będzie trzeba przejść do GLS (Generalized Least Squares model). Jednak o tym opowiemy w następnym tygodniu, bo jeśli chodzi o nasze prestiżowe dane nie ma takiej potrzeby.
+Zdiagnozowanie heteroskedastyczności nie należy do przesadnie trudnych i poza opisanymi powyżej metodami jest milard innych (np. Breush-Pagan Test, White's General Test, Park Test), jednak naszym zdaniem dobrze jest przede wszystkim przyjrzeć się wykresom, żeby wiedzieć co się dzieje w danych. Problem pojawia się wtedy gdy pojawia się heteroskedastyczność. Najłatwiejszym rozwiązaniem jest dodanie nowego predyktora, myślę, że w większości przypadków rozwiązuje to problem. Nowy predyktor rozumiany jest tutaj zarówno jako nowa zmienna jak i przekształcona zmienna już w modelu istniejąca - oczywiście w taki sposób, żeby miało to sens teoretyczny. Jeśli żadno z powyższych rozwiązań nie skutkuje to będzie trzeba przejść do GLS (Generalized Least Squares model). Jednak o tym opowiemy w następnym tygodniu, bo jeśli chodzi o nasze prestiżowe dane nie ma takiej potrzeby.
 
-```{r solution}
+```{r solution_hetero}
 # jeśli przyjrzymy się residualPlots i wynikowi testu dopasowania Tukey'a to widać, że zależność wygląda na kwadratową w związku z czym logarytm z podstawą dwójki powinien załatwić sprawę.
 model2 <- update(model,~. - income + log2(income),data=Prestige)
 
@@ -70,9 +76,92 @@ BIC(model,model2)
 
 Ogólnie rzecz biorąc na podstawie naszych analiz widać, że model z uwzględnieniem logarytmu przychodu jest lepszy niż pierwotny model.
 
+## Normlaność
+
+Odchylenie od normalności rozkładu reszt jest jednym z najtrudniejszych do zdiagnozowania, głównie dlatego, że informacji na ten temat mogą dostarczyć nam wyłącznie reszty (jednak zazwyczaj jeśli uporamy się z heteroskedastycznością to reszty się normalizują). Istnieje całe multum różnych sposobów badania tego, jednak punkt wyjścia jest mniej lub bardziej zawsze ten sam: wykres kwantyli oraz wykres rozkładu reszt.
+
+Wykorzystamy tutaj dane ze zbioru Ornstein, które wbudowane są w pakiet `car`. Dane te dotyczą 248 największych kanadyjskich firm z połowy lat 70tych.
+
+`interlocks` - liczba powiązanych ze sobą dyrektorów, tzn. dzielonych z innymi firmami  
+`assets` - aktywa w milionach dolarów  
+`nation` - kraj kontrolujący, zmienna nominalna  
+`sector` - sektor przemysłu, zmienna nominalna  
+Na sam początek stworzymy następujący model:
+$$Powiązani.dyrektorzy = \beta_0+\beta_1Aktywa+\beta_2Kraj.kontrolujący+\beta_3Sektor$$
+
+```{r normalnosc_reszt}
+# Zaczniemy od stworzenia modelu. Ważna uwaga użyjemy tutaj logarytmu z aktywów, bo interesuje nas wzrost o rząd wielkości, a nie zmiana addytywna. Poza tym dodamy do interlocks 1, żeby uniknąć sytuacji, w której mamy 0. Głównie dlatego, że zaraz będziemy rozważać potęgową transformację interlocksów, w przypadku zer byłoby to utrudnione...
+mod.norm <- lm(interlocks+1~log(assets)+nation+sector,data=Ornstein)
+# porównanie rozkładu kwartyli
+qqPlot(mod.norm,ylab="Studentized Residuals")
+# porównanie gęstości z rozkładem normlanym
+mod.norm %>%
+  rstudent() %>%
+  density() %>%
+  plot(main="")
+  curve(dnorm,add=TRUE,col="red")
+  legend('topright', c("Normalny","Empiryczny") ,  lty=1, col=c('red', 'black'), bty='n', cex=.75)
+```
+Jeśli chodzi o intepretację powyższych wykresów jest ona wręcz banalnie prosta. Jeśli w pierwszym reszty wystają poza czerwone linie przerywane to niedobrze. Jeśli w drugim rozkład czarny jest ewidnetnie różny od czerwonego to też niedobrze. Ogólnie rzecz biorąc jest parę możliwości co zrobić z tym fantem. Innymi słowy jak przekształcić zmienną zależną, aby zbliżyć się do normalności reszt. My tutaj zaprezentujemy chyba najpopularniejsze przekształcenie Boxa-Coxa (nie wiem mnie niezmiernie śmieszy połączenie tych dwóch nazwisk **przyp. Mikołaj**). Pamiętać jednak trzeba, że każde przekształcenie zmiennej zależnej musi mieć sens teoretyczny.
+```{r solution_norm}
+# poglądowy wykres lambdy, czyli wartości o jaką trzeba przekształcić y, żeby otrzymać najbardziej normalny rozkład. Maksimum tej funkcji to lambda. 
+mod.norm %>%
+  boxCox(lambda=seq(0,0.6,by=0.1))
+# argument lambda w powyższej funkcji jest opcjonalny i normalnie jest z przedziału -2 do 2. Jako, że umiemy czytać w wosku to wiemy, że maksimum będzie między 0, a 0.6.
+
+# ta funkcja służy do policzenia lamby
+lambda <- powerTransform(mod.norm)
+# żeby jednak ją wyciągnąć z tej funkcji trzeba użyć funkcji coef, która zwraca po prostu współczynnik
+coef(lambda)
+
+# przekształcenie naszych danych
+mod.norm2 <- Ornstein %>%
+  mutate(y1=bcPower(interlocks+1,coef(lambda))) %$%
+  lm(y1~log(assets)+nation+sector)
+
+# sprawdzenie czy jest lepiej
+mod.norm2 %>%
+  qqPlot
+
+mod.norm2 %>%
+  rstudent() %>%
+  density() %>%
+  plot(main="")
+  curve(dnorm,add=TRUE,col="red")
+  legend('topright', c("Normalny","Empiryczny") ,  lty=1, col=c('red', 'black'), bty='n', cex=.75)
+
+# porównanie modeli  
+BIC(mod.norm,mod.norm2)  
+AIC(mod.norm,mod.norm2)
+```
+Ogólnie widać, że przekształcenie zmiennej zależnej przyniosło oczekiwane rezultaty. Model jest lepiej dopasowany. Jednak w praktyce wydaje mi się, że szybciej i łatwiej przekształca się albo predyktory, albo po prostu logarytmizuje się zmienną zależną. W przypadku przekształcenia Boxa-Coxa (dalej mnie to śmieszy **przyp. Mikołaj**) warto wiedzieć, że $\lambda=0$ to po prostu przekształcenie logarytmiczne, $\lambda=0.5$ to pierwiastek kwadratowy, $\lambda=1/3$ to pierwiastek trzeciego stopnia.
+
+## Errata Homoskedastyczność versus Heteroskedastyczność
+
+Wróćmy na moment do poprzedniego punktu, bo podobną metodę jak w przypadku normalności możemy zastosować w przypadku założenia o homoskedastyczności wariancji. Tak jak w przypadku przekształcenia Boxa-Coxa (po porstu chciałem jeszcze raz zaznaczyć, że nie przerwanie mnie śmieszy to połączenie **przyp. Mikołaj**).
+
+```{r errata_solution_hetero}
+# używając modelu Boxa-Tidwella można wyznaczyć lambdę o którą trzeba przekształcić predyktor, żeby wariancja była homogeniczna. Trzeba jednak pamiętać, że zmienną nominalną trzeba zapisać jako argument other.x
+boxTidwell(prestige~income+education,other.x = ~type,data=Prestige)
+
+# policzenie lamby
+lambda <- Prestige %$%
+  income %>%
+  powerTransform()
+
+# policzenie nowego modelu
+model3 <- Prestige %>%
+  mutate(income_2=bcPower(income,coef(lambda))) %$%
+  lm(prestige ~ education + income_2 + type, data=Prestige)
+
+# sprawdzenie jak to wygląda w przypadku porównania naszych modeli. Jest lepiej niż na samym początku, ale jednak sam logarytm był najlepszym rozwiązaniem.
+AIC(model3,model2,model)
+BIC(model3,model2,model)
+```
+
 ## Autokorelacja
 
-Kolejnym problemem, który może wystąpić w naszym modelu jest autokorelacja reszt. Innymi słowy może się tak zdażyć, że jest jakaś zależność między kolejnymi obserwacjami (ogólnie rzecz biorąc relatywnie rzadko to się zdarza jeśli nie mamy doczynienia z time series).
+Kolejnym problemem, który może wystąpić w naszym modelu jest autokorelacja reszt. Innymi słowy może się tak zdażyć, że jest jakaś zależność między kolejnymi obserwacjami (ogólnie rzecz biorąc relatywnie rzadko to się zdarza jeśli nie mamy doczynienia z szeregami czasowymi).
 
 Tak jak w przypadku homoskedastycznoścy czy też heteroskedastyczności jest wiele testów za pomocą, których można sprawdzać autokorelacje (np. test Durbina-Watsona, ale za jego pomocą można identyfikować autokorelacje tylko pierwszego rzędu), jednak tutaj zastosujemy połączneie dwóch metod: testu Breusha-Godfreya i wizualnej. Użyjemy specjalnie przygotowanych na tę okazję danych, żeby pokazać też co robić jeśli autokorelacja się pojawi #spoilerAlert. Jako, że tak naprawdę nie ma większego znaczenia co to za dane to powiem tylko, że dotyczą popularności Kanclerzy w Niemczech mierzonej różnymi metodami.
 
@@ -83,10 +172,10 @@ dane_aut <- read.csv("ICPSRKanzlerDaten.csv")
 # skonstruowanie modelu
 model_aut <- lm(Y1~X2+X3+X4, data=dane_aut)
 
-# test Breusha-Godfreya. Ustawiamy order na 3, żeby sprawdzić czy występują korelacje do trzeciego rzędu. Zasadniczo rzadko się zdarza, żeby występowały wyższego rzędu, tzn. autokorelacj pierwszego rzędu oznacza, że jest związek z poprzednią resztą, drugiego, że przedostatnią itd.
+# test Breusha-Godfreya. Ustawiamy order na 3, żeby sprawdzić czy występują korelacje do trzeciego rzędu. Zasadniczo rzadko się zdarza, żeby występowały wyższego rzędu, tzn. autokorelacja pierwszego rzędu oznacza, że jest związek z poprzednią resztą, drugiego, że przedostatnią itd.
 bgtest(model_aut, order = 3)
 ```
-Jak widać test Breusha-Godfreya wyszedł istotny co oznacza ni mniej ni więcej, że mamy doczyeniania z autokorelacją reszt w naszy modelu. Jednak tak naprawdę nie za dużo nam to mówi. Przede wszystkim chcielibyśmy wiedzieć, z którego rzędu korelacją mamy doczynienia. Innymi słowy czy korelacja jest z poprzednim wyrazem, jeszcze poprzednim czy może dwa wyrazy do tyłu (w zasadzie wyższego rzędu nie występuje autorekorelacja). Żeby się tego dowiedzieć zrobimy wykresy autokorelacji, które najłatwiej będzie porównać z wykresami w pliku strona.
+Jak widać test Breusha-Godfreya wyszedł istotny co oznacza ni mniej ni więcej, że mamy doczyeniania z autokorelacją reszt w naszy modelu. Jednak tak naprawdę nie za dużo nam to mówi. Przede wszystkim chcielibyśmy wiedzieć, z którego rzędu korelacją mamy doczynienia. Innymi słowy czy korelacja jest z poprzednim wyrazem, jeszcze poprzednim czy może dwa wyrazy do tyłu (w zasadzie wyższego rzędu nie występuje). Żeby się tego dowiedzieć zrobimy wykresy autokorelacji, które najłatwiej będzie porównać z wykresami w pliku strona.
 ```{r autocorrelation_graphs}
 # wykres autokorealcji
 model_aut %>%
@@ -99,7 +188,7 @@ model_aut %>%
   pacf %$%
   acf
 ```
-Porównując otrzymane wykresy z wykresami w pdf widać, że mamy doczynienia z autokorelacją reszt pierwszego rzędu. Jednak to nie rozwiązuje dość istotnego problemu, a mianowicie co z tym fantem zrobić? Ogólnie rzecz ujmując trzeba wprowadzić poprawkę, która zniweluje autokorelacje reszt.
+Porównując otrzymane wykresy z wykresami z pliku Strona widać, że mamy doczynienia z autokorelacją reszt pierwszego rzędu. Jednak to nie rozwiązuje dość istotnego problemu, a mianowicie co z tym fantem zrobić? Ogólnie rzecz ujmując trzeba wprowadzić poprawkę, która zniweluje autokorelacje reszt.
 
 ```{r autocorrelation_solution}
 # pierwsze rzecz, którą robimy to zapisujemy reszty
@@ -111,7 +200,8 @@ residuals_lag1 <- residuals %>%
   lag()
 
 # liczę kombinację liniową reszt zlagowanych i niezlagowanych. Innymi słowy liczę regresję i biorę betę. Ważna uwaga jest taka, że liczymy regresję bez interceptu.
-rho <- lm(residuals~0+residuals_lag1,dane_aut)$coef
+rho <- lm(residuals~0+residuals_lag1,dane_aut) %>%
+  coef()
 
 # liczę poprawkę dla każdej zmiennej
 dane_aut$y_star <- with(dane_aut,y_star <- Y1-rho*lag(Y1))
@@ -123,7 +213,7 @@ dane_aut$x4_star <- with(dane_aut,x4_star <- X4-rho*lag(X4))
 model_aut_corrected <- lm(y_star~0+I(1-rep(rho,60))+x2_star+x3_star+x4_star,dane_aut)
 
 # sprawdzenie czy to w ogóle coś dało
-bgtest(model_aut_corrected)
+bgtest(model_aut_corrected,order=3)
 
 # wykres autokorealcji
 model_aut_corrected %>%
@@ -144,7 +234,7 @@ AIC(model_aut,model_aut_corrected)
 
 ## Outliery
 
-Kolejnym problemem pojawiającym się w analizie regresji są tzw. outliery. W tym wypadku indentyfikacja jest dość prosta jednak już rozwiązanie problemu co ze zidentyfikowanym outlierem zrobić taka prosta nie jest. Jest to bardziej koncepcyjny problem, a co za tym idzie pozwala bardziej zrozumieć dane/zależność niż cokolwiek innego. Tym razem wrócimy znowu do presiżowych danych.
+Kolejnym problemem pojawiającym się w analizie regresji są tzw. outliery. W tym wypadku indentyfikacja jest dość prosta jednak już rozwiązanie problemu co ze zidentyfikowanym outlierem zrobić takie proste nie jest. Jest to bardziej koncepcyjny problem, a co za tym idzie pozwala bardziej zrozumieć dane/zależność niż cokolwiek innego. Tym razem wrócimy znowu do presiżowych danych.
 
 ```{r outliery}
 # nowy model
@@ -153,23 +243,23 @@ model_outlier <- lm(prestige ~ income + education, data=Duncan)
 # pierwsza identyfikacja to po prostu sprawdzenie, które reszty są odchylone od rozkładu normalnego najbardziej. Czerwona linia to kwantyle rozkładu normalnego
 qqPlot(model_outlier,id.n=3)
 
-# Bonferroni Outlier Test
+# Bonferroni Outlier Test. Zasadniczo testujemy tutaj na ile najdalej oddalony punkt, jest istotny. Patrzymy na poprawkę Bonferroniego bo testuejmy wiele razy.
 outlierTest(model_outlier)
 
-# inną metodą są po prostu wykresy
+# inną metodą są po prostu wykresy, d-Cooka, hat-values, p-Bonferroniego oraz reszt
 influenceIndexPlot(model_outlier, id.n=3)
+# gdzie hat values to po prostu odlegość od centroidu
 
-# wykres najbardziej wpływających rekordów
+# wykres połączonych d-Cooka, hat-values i reszt
 influencePlot(model_outlier,id.n=3)
 
-# wykres
-crPlots(model_outlier, id.n=3)
 ```
+Tak naprawdę moim zdaniem co na podstawie analizy outlierów można powiedzieć to to czy, któreś z obserwacji nie zostały wzięte przez przypadek. W takim sensie, że być może chcieliśmy badać np. związek uczenia się przez osoby nieanglojęzyczne angielskiego z inteligencją, a w naszej grupie badanej znalazła się przez przypadek osoba bardzo głupia, która mieszka na Malcie, gdzie językiem urzędowym jest angielski.
 
 ## Kolinearność
 
-Jedną z największych zbrodni, którą można popełnić w analizie regresji jest kolinearność zmiennych. Innymi słowy zmienne zależne są kombinacją liniową samych siebie. Oczywiście w prawdziwym świecie nie zdarza się, żeby jedna zmienna była liniową kombinacją innych (chyba, że popełnimy jakiś błąd w przekształcaniu danych i wrzucimy do modelu dwie te same zmienne z różnymi nazwami #beenThereDoneThat). Jeśli jednak tak się zdarzy to model się po prostu nie policzy *Nie trzeba o tym myśleć ale wynika to po prostu z algebry macierzy.* Może natomiast się zdarzyć, że będziemy mieli doczynienia z sytuacją w której będziemy mieli "dość" wysoką kolineraność zmiennych.
-Znowu jest tak, że można do tego zagadnienia podejść na wiele sposobów. Tutaj skupimy się na jednym tak zwanym Joint Hypothesis Test. 
+Jedną z największych zbrodni, którą można popełnić w analizie regresji jest kolinearność zmiennych. Innymi słowy zmienne zależne są kombinacją liniową samych siebie. Oczywiście w prawdziwym świecie nie zdarza się, żeby jedna zmienna była liniową kombinacją innych (chyba, że popełnimy jakiś błąd w przekształcaniu danych i wrzucimy do modelu dwie te same zmienne z różnymi nazwami #beenThereDoneThat). Jeśli jednak tak się zdarzy to model się po prostu nie policzy *Nie trzeba o tym myśleć ale wynika to po prostu z algebry macierzy.* Może natomiast się zdarzyć, że będziemy mieli doczynienia z sytuacją w której będziemy mieli "dość" wysoką kolineraność zmiennych.  
+Znowu jest tak, że można do tego zagadnienia podejść na wiele sposobów. Tutaj skupimy się na jednym tak zwanym Joint Hypothesis Test. Wykorzystamy tutaj specjalnie stworzone dane, więc nie ma specjalnie sensu tłumaczyć co reprezentują X, a co Y (dla ciekawskich mogę zdradzić, że absolutnie nic)
 ```{r colinearity}
 #stowrzenie modelu
 dane_kol <- read.csv("Singular.csv")
@@ -180,7 +270,7 @@ summary(model_kol)
 X_matrix <- model.matrix(model_kol)
 kappa(X_matrix)
 ```
-Skoro już wiemy, że jest kolineraność niektórych zmiennych to warto się przyjrzeć, których. Zasadniczo skoro kolinearność rozumiana jest jako liniowa kombinacja to trzeba po prostu zrobić analiże regresji, gdzie zmienną wyjaśnianą będą po kolei predyktory. W ten sposób uda nam się ustalić, który można zapisać jako liniową kombinację, których. Niestety jest to dość żmudne i nudne. Zasadniczo w pierwszym kroku sprawdzam ile wariancji jednego predyktora wyjaśniają pozostałe, a w drugim po prostu sprawdzam istotność.
+Skoro już wiemy, że jest kolineraność niektórych zmiennych to warto się przyjrzeć, których. Zasadniczo skoro kolinearność rozumiana jest jako liniowa kombinacja to trzeba po prostu zrobić analizę regresji, gdzie zmienną wyjaśnianą będą po kolei predyktory. W ten sposób uda nam się ustalić, który można zapisać jako liniową kombinację, których. Niestety jest to dość żmudne i nudne. Zasadniczo w pierwszym kroku sprawdzam ile wariancji jednego predyktora wyjaśniają pozostałe, a w drugim po prostu sprawdzam istotność.
 ```{r joint_hypothesis_test}
 #x1
 1-summary(lm(X1~X2+X3+X4+X5+X6+X7,dane_kol))$r.squared
@@ -208,11 +298,11 @@ summary(lm(X7~X1+X2+X3+X4+X5+X6,dane_kol))
 
 # sprawdzenie czy zmienna X2, X3, X5 i X6 wnoszą coś do modelu
 model_x1_x7 <- lm(y~X1+X7,dane_kol)
-anova(model_kol,model_x6_x7)
+anova(model_kol,model_x1_x7)
 
 #sprawdzenie czy zmienne X6 i X7 wnoszą coś do modelu
 model_x1_x2_x4_x3_x5 <- lm(y~X1+X4+X2+X3+X5,dane_kol)
-anova(model_kol,model_x2_x3_x5_x6)
+anova(model_kol,model_x1_x2_x4_x3_x5)
 ```
 Zasadniczo widać, że w tym modelu zmienne są kolinearne. W związku z tym należałby na sam początek zastanowić się nad stworzeniem wskaźnika ze zmiennych X6 i X7, następnie sprawdzić co dzieje się wtedy z modelem. Jeśli dalej mamy doczeniania z kolineranoscią to pewnie dobrze by było znowu zastanowić się nad stworzeniem wskaźnika z pozostałych kolinearnych zmiennych. Najlepiej byłoby pewnie w tym celu zastosować PCA (Principal Component Analysis), ale to już trochę inna historia.
 <!-- CSS styling -->
